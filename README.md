@@ -103,3 +103,103 @@ Below you can see some of the frequently asked questions by the developers, whic
 At the same time, with this structure, you can perform innovations much faster because you do not have to add the newly added fields to all the documents in the collection.
 It should be added independently of the project that NoSQL databases are more preferred in projects where large volumes of data are managed.
 
+### Customers
+There is some information requested by the program when storing customer data,
+
+| Name          | Mail 1        | Mail 2        | Mail 3        | Extra Code    | Notifications |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| Company 1     | company1@...  | company1@...  |    None       | False         | True          |
+| Company 2     | company2@...  | None          | None          | True          | True          |
+
+At least the name entry is enough for the following structure to be formed on the MongoDB side.
+
+```json
+{
+  "_id":"Company 2",
+  "mail1":"company2@company.com",
+  "mail2":"",
+  "mail3":"",
+  "extra_code":true,
+  "notification":true
+}
+```
+### Cargos
+```json
+{
+  "_id":"Cargo 1",
+  "authority":"James Thompson",
+  "phone":"+90 212 586 86 21",
+  "adress":"Hayriye Tüccarı Cad. Kızıltaş Sok. No:57/1 Nişanca/Kumkapı/ İstanbul"
+}
+```
+### Products 
+```json
+{
+  "_id":"Product 1",
+  "code":"2201.1D",
+  "supplier":"Company ABC",
+  "supplier_product_name":"Product A",
+  "type":"Fabric",
+  "usage":"Curtain",
+  "width":300,
+  "weight":258,
+  "composition":"%72 Polyester %28 Viskon",
+  "color_codes":[
+      "2201.1D.78",
+      "2201.1D.34",
+      "2201.1D.67",
+      "2201.1D.23",
+      "2201.1D.28",
+      "2201.1D.14",
+      "2201.1D.36",
+      "2201.1D.38",
+      "2201.1D.55",
+      "2201.1D.88",
+      "2201.1D.32"
+      ]
+}
+```
+### Orders
+
+```json
+{
+  "_id":"PAR100122-2",
+  "Company Name":"PARK HOUSE",
+  "Crated_by":"cuneyttopbas",
+  "Created_at":"2022-01-10 13:32:20",
+  "Order_at":"10.01.2022",
+  "Receiver Info":{
+      "Receiver Name":"PARK HOUSE",
+      "Authority":"",
+      "Company Phone":"",
+      "Company GSM":"",
+      "Company Adress":""
+      },
+  "Shipping Info":{
+      "Shipper Name":"BAKIR ",
+      "Customer Code":"690",
+      "Shipping Type":"",
+      "Shipper Phone":"",
+      "Shipper Adress":"Neslişah Mah. Vatan Cad. Banka Evleri C1 Blok No 82/1 Fatih"
+      },
+  "Order Details":{
+      "1":{
+          "Status":"delivered",
+          "Item":"LINERA",
+          "Color":"1830.1D.02",
+          "Meter":"4.5",
+          "Note":"",
+          "Delivered_at":"2022-01-11 16:41:14"
+          },
+      "2":{
+        "Status":"delivered",
+        "Item":"VISTA",
+        "Color":"1828.1D.03",
+        "Meter":"1.7",
+        "Note":"",
+        "Delivered_at":"2022-01-11 16:41:18"
+      }
+   }
+}
+```
+
