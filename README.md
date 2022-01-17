@@ -24,7 +24,7 @@ Navigate Chapters,
 - [User Interface](#userinterface)
   - [Main Window](#mainwindow)
 - [Server App](#server)
-- [Data Modelling](#datamodelling)
+- [Data Modelling](#data-modelling)
     -[Customers](#customers) 
     -[Cargos](#cargos)
     -[Products](#products)
