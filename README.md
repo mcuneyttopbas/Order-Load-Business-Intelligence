@@ -103,6 +103,20 @@ Below you can see some of the frequently asked questions by the developers, whic
 At the same time, with this structure, you can perform innovations much faster because you do not have to add the newly added fields to all the documents in the collection.
 It should be added independently of the project that NoSQL databases are more preferred in projects where large volumes of data are managed.
 
+**Note** : Since information such as Customer Name, Shipping Name, Product Name and Order Code is unique, this information is used in the **"_id"** field instead of **"ObjectId"**. Thanks to this method, queries have become easier to do.
+
+### Connection
+If the login is successful in the Username and Password entries in Login Form, takes place at the connection string displayed. Then connection to collections are completing as it seen below.
+```python
+self.myclient = pymongo.MongoClient(f"mongodb+srv://{username_entry}:{password_entry}@cluster0.asdnj.mongodb.net/app_test?retryWrites=true&w=majority")
+self.mydb = self.myclient["order-load"]
+self.customer_coll = self.mydb["customers"]
+self.cargo_coll = self.mydb["cargos"]
+self.order_coll = self.mydb["orders"]
+self.product_coll = self.mydb["products"]
+self.setting_coll = self.mydb["settings"]
+```
+
 ### Customers
 There is some information requested by the program when storing customer data,
 
@@ -135,7 +149,7 @@ At least the name entry is enough for the following structure to be formed on th
 ### Products 
 ```json
 {
-  "_id":"Product 1",
+  "_id":"Product A",
   "code":"2201.1D",
   "supplier":"Company ABC",
   "supplier_product_name":"Product A",
@@ -161,45 +175,130 @@ At least the name entry is enough for the following structure to be formed on th
 ```
 ### Orders
 
+Below is an example of **correlating data**. In the Company Name field, **customers** collection must match the information in the **"_id"** field. This matching takes place when the order is entered. The same applies to cargo and product informations.
+
 ```json
 {
-  "_id":"PAR100122-2",
-  "Company Name":"PARK HOUSE",
+  "_id":"COM100122-2",
+  "Company Name":"Company 1",
   "Crated_by":"cuneyttopbas",
   "Created_at":"2022-01-10 13:32:20",
   "Order_at":"10.01.2022",
   "Receiver Info":{
-      "Receiver Name":"PARK HOUSE",
-      "Authority":"",
-      "Company Phone":"",
-      "Company GSM":"",
-      "Company Adress":""
+      "Receiver Name":"ABC Textile Co.",
+      "Authority":"Hannah Simpson",
+      "Company Phone":"+90 530 0354 6",
+      "Company GSM":"+25 441 25 544",
+      "Company Adress":"Moscow, Russia"
       },
   "Shipping Info":{
-      "Shipper Name":"BAKIR ",
+      "Shipper Name":"Cargo 1 ",
       "Customer Code":"690",
-      "Shipping Type":"",
-      "Shipper Phone":"",
+      "Shipping Type":"Air Shipment",
+      "Shipper Phone":"+452 22 4 5 55 ",
       "Shipper Adress":"Neslişah Mah. Vatan Cad. Banka Evleri C1 Blok No 82/1 Fatih"
       },
   "Order Details":{
       "1":{
           "Status":"delivered",
-          "Item":"LINERA",
-          "Color":"1830.1D.02",
-          "Meter":"4.5",
-          "Note":"",
+          "Item":"Product A",
+          "Color":"2201.1D.78",
+          "Meter":"35",
+          "Note":"Free of Charge",
           "Delivered_at":"2022-01-11 16:41:14"
           },
       "2":{
-        "Status":"delivered",
-        "Item":"VISTA",
+        "Status":"new",
+        "Item":"Product B",
         "Color":"1828.1D.03",
         "Meter":"1.7",
         "Note":"",
-        "Delivered_at":"2022-01-11 16:41:18"
+        "Delivered_at":"Not Shipped yet"
+      }
+      "3-1":{
+        "Status":"preparing",
+        "Item":"Product C",
+        "Color":"1898.1D.05",
+        "Meter":"10.5",
+        "Note":"Be careful with this one",
+        "Delivered_at":"Not Shipped yet"
+      }
+      "3-2":{
+        "Status":"waiting",
+        "Item":"Product C",
+        "Color":"1898.1D.05",
+        "Meter":"4.5",
+        "Note":"Be careful with this one",
+        "Delivered_at":"Not shipped yet",
+        "Info_by" : "operation_departmant",
+        "Waiting_cause" :"We dont have it now, not able to prepare!",
+        "Waiting_info": "We will have it in two weeks."
       }
    }
 }
+```
+To reinforce with an example, it has matched this information, which is actually still unrelated and consists of a string data, preventing a different selection in the user interface,
+
+##### Matching Products while Adding an Order
+
+```python
+product = self.product_coll.find_one({"_id":product_name}) # Filter with "_id" which the name of the Product
+if product is not None:
+    if color in product["color_codes"]:
+        if self.isFloat(meter) == True:
+            self.order_data["Order Details"][str(line)] = {
+                "Status": "new",
+                "Item" : product_name,
+                "Color" : color,
+                "Meter" : meter,
+                "Note"  :   "",
+                "Delivered_at":"Not Shipped Yet"
+            }   
+```
+##### Matching All Datas while Sending Loading Report at the Server side
+
+```python
+
+for company in self.customer_coll.find():           # Step 1-  Reaching to "customers" collection
+    delivered_items = []                    
+    for order in self.order_coll.find():            # Step 2-  Reaching to "orders" collection
+        if order["Company Name"] == company["_id"]: # Step 3-  Matching a document's "_id" field from customers with document's "Company Name" from orders
+            counter = 1
+            for order_items in order["Order Details"]:
+                if order['Order Details'][order_items]['Delivered_at'] != "Henüz Teslim Edilmedi":
+                    deliver_date = order['Order Details'][order_items]['Delivered_at']
+                    deliver_date_object = datetime.strptime(deliver_date, '%Y-%m-%d %H:%M:%S')
+                    if deliver_date_object > self.this_date_object:
+                        cargo_recevier = f"LOADING ID: {counter}\nCARGO: {order['Shipping Info']['Shipper Name']}  RECEIVER: {order['Receiver Info']['Receiver Name']}\n"
+                        delivered_items.append(f"{cargo_recevier}{order['_id']}/{order_items}: {order['Order Details'][order_items]['Item']} {order['Order Details'][order_items]['Color']} {order['Order Details'][order_items]['Meter']} MT") 
+                        counter += 1 
+    if len(delivered_items)  > 0:
+        toList = []
+        ccList = []
+
+        customer = self.customer_coll.find_one({"_id":company["_id"]})
+        for info in customer:
+            if "mail" in info:
+                if customer[info] != "":
+                    toList.append(customer[info])
+
+        settings = self.setting_coll.find_one({"_id":"notifications"})
+        for setting in settings:
+            if setting == "executive":
+                for adress in settings[setting]:
+                    ccList.append(adress["mail"])
+
+        subject = f"LOADING REPORT: {company['_id']} {self.day}{self.month}{str(self.year)[-2:]}"
+        body = "Hello,\n\nThe details of your loading done today are shared below,\n\n\n"
+        for item in delivered_items:
+            body += (item + "\n\n")
+        body += "\n\nPlease do not reply this e-mail."
+
+        self.send_notification_to_customer(toList,ccList,subject,body)
+        self.write_on_records(f"Information of the Loading of {len(delivered_items)} item succesfully sent to {company['_id']}.")
+        self.load_screen()
+
+self.write_on_records("Sending Report Process is completed.")
+
 ```
 
