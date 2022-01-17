@@ -96,3 +96,10 @@ Below you can see some of the frequently asked questions by the developers, whic
 -	How to manage settings locally with json file?
 -	How to read file and apply data with Pandas library?
 -	How to synchronize data and export to excel file with Openpyexcel library?
+
+## Data Modelling
+
+**MongoDB**, which is a NoSQL database, was preferred in the project. With this feature, MongoDB allows you to create non-relational data collections containing documents. Of course, there will always be data that needs to be associated with each other, but completing this association on the side where the queries are sent provides significant flexibility to the developers. When needed, dictionary-type data with key-value relationships, arrays or arrays of dictionary-type data can be added to the documents.
+At the same time, with this structure, you can perform innovations much faster because you do not have to add the newly added fields to all the documents in the collection.
+It should be added independently of the project that NoSQL databases are more preferred in projects where large volumes of data are managed.
+
