@@ -25,13 +25,13 @@ Navigate Chapters,
   - [Main Window](#mainwindow)
 - [Server App](#server)
 - [Data Modelling](#data-modelling)
-    -[Customers](#customers) 
-    -[Cargos](#cargos)
-    -[Products](#products)
-    -[Orders](#orders)
-    -[Notifications](#notifications)
-    -[Server Log](#serverlog)
-  
+  - [Customers](#customers) 
+  - [Cargos](#cargos)
+  - [Products](#products)
+  - [Orders](#orders)
+  - [Notifications](#notifications)
+  - [Server Log](#serverlog)
+
   
 
 ## Introduction
@@ -309,4 +309,118 @@ for company in self.customer_coll.find():           # Step 1-  Reaching to "cust
 self.write_on_records("Sending Report Process is completed.")
 
 ```
+### Notifications
+The program sends automatic mails at many stages. According to the subject of the stages, the people to whom the e-mail will be sent also vary.
 
+```json
+{
+  "_id":"notifications",
+  "operation_departmant":[
+    {"mail":"operator_1@company.com"},
+    {"mail":"operator_2@company.com"}
+    ],
+  "customer_service":[
+    {"mail":"customer_service@company.com"}
+    ],
+  "executive":[
+    {"mail":"cuneyt.topbas@company.com"},
+    ],
+  "supplying_departmant":[
+    {"mail":"supplying@company.com"}
+    ],
+  "technic":[
+    {"mail":"technic@company.com"}
+    ],
+    "admin":[
+    {"mail":"admin@gmail.com","password":"Admin123"}
+  ],
+}
+```
+##### Selecting Relevant Adresses
+If the Operation, Customer Service and Executive units within the company need to take action or be informed at the time of placing the order, it will be useful to create the structure below.
+
+```python
+settings = self.setting_coll.find_one({"_id":"notifications"})
+for setting in settings:
+    if setting == "operation_departmant":
+        for adress in settings[setting]:
+            toList.append(adress["mail"])
+    elif setting == "executive":
+        for adress in settings[setting]:
+            ccList.append(adress["mail"])
+    elif setting == "customer_service":
+        for adress in settings[setting]:
+            ccList.append(adress["mail"])
+```
+
+### Server Log
+Taking advantage of Artificial Intelligence provides serious convenience in our lives. So much so that these conveniences can turn into habits over time. For this reason, stability is very important at this stage.
+
+In order to ensure stability, it is important to be aware of errors quickly as well as to avoid errors. This can only be possible with close monitoring. In order to achieve this, it was deemed appropriate to create a structure like the one below.
+```json
+{
+  "_id":"server_log",
+  "last_seen":"2022-01-14 18:00:00",
+  "records":[
+      "2022-01-10 09:29:01 Database connection is activated.",
+      "2022-01-10 09:29:01 Application is activated.",
+      "2022-01-10 09:29:09 Application is tested successfully.",
+      "2022-01-10 09:29:40 Close Event of the Server App is successfully activated.",
+      "2022-01-10 09:37:15 Database connection is activated.",
+      "2022-01-10 09:37:15 Application is activated.",
+      "2022-01-10 18:00:00 Time is matched to send loading reports.",
+      "2022-01-10 18:00:00 Sending Report Process is started.",
+      "2022-01-10 18:00:00 Information of the Loading of 3 item succesfully sent to Company 1.",
+      "2022-01-10 18:00:00 Sending Report Process is completed.",
+      "2022-01-11 18:00:00 Time is matched to send loading reports.",
+      "2022-01-11 18:00:00 Sending Report Process is started.",
+      "2022-01-11 18:00:00 Information of the Loading of 8 item succesfully sent to Company 1.",
+      "2022-01-11 18:00:00 Information of the Loading of 3 item succesfully sent to Company 2.",
+      "2022-01-11 18:00:00 Information of the Loading of 2 item succesfully sent to Company 3.",
+      "2022-01-11 18:00:00 Sending Report Process is completed.",
+      "2022-01-12 18:00:00 Time is matched to send loading reports.",
+      "2022-01-12 18:00:00 Sending Report Process is started.",
+      "2022-01-12 18:00:00 There was no any loading today to send as a report.",
+      "2022-01-12 18:00:00 Sending Report Process is completed.",
+      "2022-01-13 18:00:00 Time is matched to send loading reports.",
+      "2022-01-13 18:00:00 Sending Report Process is started.",
+      "2022-01-13 18:00:00 Information of the Loading of 5 item succesfully sent to Company 2.",
+      "2022-01-13 18:00:00 Information of the Loading of 3 item succesfully sent to Company 1.",
+      "2022-01-13 18:00:00 Information of the Loading of 2 item succesfully sent to Company 5.",
+      "2022-01-13 18:00:00 Sending Report Process is completed.",
+      "2022-01-14 11:43:45 Database connection is activated.",
+      "2022-01-14 11:43:45 Application is activated.",
+      "2022-01-14 11:44:12 Close Event of the Server App is successfully activated.",
+      "2022-01-14 11:44:24 Database connection is activated.",
+      "2022-01-14 11:44:24 Application is activated.",
+      "2022-01-14 11:44:43 Application is tested successfully.",
+      "2022-01-14 11:44:49 send_records method is called from the console.",
+      "2022-01-14 11:44:49 Records are sent successfully from the console.",
+      "2022-01-14 11:44:55 Invalid entrance is detected at the console.",
+      "2022-01-14 11:45:24 Invalid entrance is detected at the console.",
+      "2022-01-14 11:45:31 Close Event of the Server App is successfully activated.",
+      "2022-01-14 18:00:00 Time is matched to send loading reports.",
+      "2022-01-14 18:00:00 Sending Report Process is started.",
+      "2022-01-14 18:00:00 There was no any loading today to send as a report.",
+      "2022-01-14 18:00:00 Sending Report Process is completed."
+      ]
+}
+```
+##### Refreshing the Array of Records
+Over time, the data here will grow and the old data will become meaningless. Therefore, there is a need to create a self-cleaning algorithm like the one below.
+```python
+ settings  = self.setting_coll.find({"_id":"server_log"})
+  for setting in settings:              # Step 1- Checks the amount of line
+      count = 0
+      for line in setting["records"]:
+          count += 1
+  if count >= 50:                       
+      delete_amount = count - 50          # Step 2- If amoutn is more than 50, it calculates the amount of line has to be deleted
+      settings  = self.setting_coll.find({"_id":"server_log"})
+      for setting in settings:
+          del_rpt = 0
+          for line in setting["records"]:
+              if del_rpt < delete_amount: # Step 3- Unwanted(Oldest) records are pulled from the array of the records
+                  self.setting_coll.update_one({"_id":"server_log"},{"$pull":{"records" : line}}) 
+                  del_rpt += 1
+```
