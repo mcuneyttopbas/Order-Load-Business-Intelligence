@@ -17,6 +17,7 @@ When I started the project, I was new to the libraries I used, but with my curre
 Navigate Chapters,
 - [Introduction](#introduction)
   - [Functions](#functions)
+  - [FAQ](#faq)
 - [User Interface](#userinterface)
   - [Main Window](#mainwindow)
 - [Server App](#server)
