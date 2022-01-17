@@ -47,22 +47,49 @@ As a result, it is necessary to prepare environments where faster and less error
 Except for internet outages, most possible **Error** situations have been brought under control.
 In any case, if there is no disconnection during the query phases, data corruption will not occur.
 
+Below is a general summary of the program's functions and some questions that developers often ask and can find answers to in the project.
+
 ### Functions
 
 -	Adding, Editing and Deleting Customer and Cargo Informations.
 -	Automatic Assignment and Sorting of Order Code
 -	Adding an Order
--	Automatic Transmission of the details of the added order to the relevant customer and operation team in e-mail format.
--	Thanks to the well-designed MongoDB Database Model, Tracking and Management of the order on a product basis, even if it is entered in bulk.
+-	Automatic Transmission of the details of the added order to the relevant customer and operation team in e-mail format
+-	Thanks to the well-designed MongoDB Database Model, Tracking and Management of the order on a product basis, even if it is entered in bulk
 -	Instant Tracking of All Orders from the Main Screen
 -	Adding Note to an order after adding
 -	Splitting Orders
 -	Managing Orders (Cancellation, Preparation, Holding, Completion and Loading)
 -	In case the order cannot be supplied, Adding a Reason for Waiting to the Holding Order
--	Automatic Transmission of the Holding Order to the supply unit in e-mail format along with the reason for the waiting.
--	Adding an Information Note to the Holding Order about when or how it will be supplied.
+-	Automatic Transmission of the Holding Order to the supply unit in e-mail format along with the reason for the waiting
+-	Adding an Information Note to the Holding Order about when or how it will be supplied
 -	Detailed Reporting of Orders
 -	Customized Settings in Order Reports (Filtering, Display Settings)
 -	Converting Order Reports as an Excel File
 -	Server Application Automatically Forwarding the loading details made during the day to the relevant customers at the end of the day in e-mail format
 -	Automatically Transmitting Shutdown or Error situations that may occur in the Server Application to the technical unit in an instant mail format
+
+### FAQ
+Below you can see some of the frequently asked questions by the developers, which you can find answers to or get ideas from in this project.
+#### PyQt5
+-	How to make a multi-window application with PyQt5?
+-	What kind of errors need to be avoided when developing a multi-window application with PyQt5?
+-	How to assign signal-slots in PyQt5?
+-	How to dynamically pass data to QTableWidget?
+-	How to add close event in widgets?
+-	How to create shortcut object with QShorcut on windows?
+-	How can I access the information in the selected row on the QTableWidget?
+-	How can I get a new row to be added when it comes to the last row in QTableWidget?
+#### MongoDB
+-	How should user name and password control be provided via MongoDB?
+-	How to access, filter and sort fields in nested dictionary data type?
+-	How to add new values, update and delete fields in nested dictionary data type?
+-	How to add new keys and values to arrays?
+-	How can arrays be updated?
+-	How to associate documents in different collections?
+#### Others
+-	How to send mail with Python?
+-	How to control keyboard keys with Python?
+-	How to manage settings locally with json file?
+-	How to read file and apply data with Pandas library?
+-	How to synchronize data and export to excel file with Openpyexcel library?
