@@ -26,7 +26,7 @@ Navigate Chapters,
 It enables to make processes safer and faster in terms of operation and follow-up until the added orders are shipped.
 Thanks to its easy use, it aims to save time for the departments. In short, it contributes to the transformation of raw data into a meaningful business process.
 
-On the **Artificial Intelligence** side of the project, enhanced thinking and data analysis capability was emphasized during the design of the processes. <br><br>
+On the **Artificial Intelligence** side of the project, enhanced thinking and data analysis capability was emphasized during the design of the processes. <br>
 **Search Algorithm**, which enables the user to avoid mistakes and take faster action during the product selection phase,<br>
 **Root Finding Algorithms** that check whether the inputs received from the user are of Integer or Float data type,<br>
 **Sorting Algorithm** that offers dynamic use of filtering and display settings while browsing reports,<br>
@@ -39,3 +39,30 @@ Most of functions except closeEvent functions are defined in the main file so th
 Only the functions of the splash and report classes are defined in the source file from which they are imported.
 This build was not intentionally created, but gave the developers a chance to experiment with two different methods. <br>
 Please be aware that aesthetic concerns have been ignored.
+
+One of the most important points in applications like this is the correct **Data Modelling**. 
+Applications that are successful in this regard are likely to produce more practical solutions on the user interface and backend.
+As a result, it is necessary to prepare environments where faster and less error-prone queries can be made for successful analysis and management of data.
+
+Except for internet outages, most possible **Error** situations have been brought under control.
+In any case, if there is no disconnection during the query phases, data corruption will not occur.
+
+### Functions
+
+-	Adding, Editing and Deleting Customer and Cargo Informations.
+-	Automatic Assignment and Sorting of Order Code
+-	Adding an Order
+-	Automatic Transmission of the details of the added order to the relevant customer and operation team in e-mail format.
+-	Thanks to the well-designed MongoDB Database Model, Tracking and Management of the order on a product basis, even if it is entered in bulk.
+-	Instant Tracking of All Orders from the Main Screen
+-	Adding Note to an order after adding
+-	Splitting Orders
+-	Managing Orders (Cancellation, Preparation, Holding, Completion and Loading)
+-	In case the order cannot be supplied, Adding a Reason for Waiting to the Holding Order
+-	Automatic Transmission of the Holding Order to the supply unit in e-mail format along with the reason for the waiting.
+-	Adding an Information Note to the Holding Order about when or how it will be supplied.
+-	Detailed Reporting of Orders
+-	Customized Settings in Order Reports (Filtering, Display Settings)
+-	Converting Order Reports as an Excel File
+-	Server Application Automatically Forwarding the loading details made during the day to the relevant customers at the end of the day in e-mail format
+-	Automatically Transmitting Shutdown or Error situations that may occur in the Server Application to the technical unit in an instant mail format
