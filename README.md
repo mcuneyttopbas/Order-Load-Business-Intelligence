@@ -30,7 +30,7 @@ Navigate Chapters,
   - [Products](#products)
   - [Orders](#orders)
   - [Notifications](#notifications)
-  - [Server Log](#serverlog)
+  - [Server Log](#server-log)
 
   
 
