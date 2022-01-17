@@ -16,6 +16,7 @@ When I started the project, I was new to the libraries I used, but with my curre
 
 Navigate Chapters,
 - [Introduction](#introduction)
+  - [Functions](#functions)
 - [User Interface](#userinterface)
   - [Main Window](#mainwindow)
 - [Server App](#server)
@@ -47,10 +48,8 @@ As a result, it is necessary to prepare environments where faster and less error
 Except for internet outages, most possible **Error** situations have been brought under control.
 In any case, if there is no disconnection during the query phases, data corruption will not occur.
 
-Below is a general summary of the program's functions and some questions that developers often ask and can find answers to in the project.
-
 ### Functions
-
+Below is a general summary of the program's functions.
 -	Adding, Editing and Deleting Customer and Cargo Informations.
 -	Automatic Assignment and Sorting of Order Code
 -	Adding an Order
