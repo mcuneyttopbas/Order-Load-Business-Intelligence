@@ -306,6 +306,12 @@ class ServerWidget(QtWidgets.QMainWindow):
         self.day = self.today.day
         self.this_date_object = datetime(int(self.year), int(self.month),int(self.day-1),int(18))
         self.now = datetime.now().strftime('%Y-%m-%d %H:%M:%S') # Now
+        
+    def check_time(self):
+        self.set_time()
+        if self.ui.txt_time.text() == "18:00:00":
+            self.write_on_records("Time is matched to send loading reports.")
+            self.send_reports()
     
 ```
 ##### Filter
@@ -344,10 +350,10 @@ def write_on_records(self, record):
 ###### Outputs:
 ###### records.txt
 ```txt
-2021-12-30 21:32:22: Failed while sending loading report to BAROQUE! Error:send_notification() takes 3 positional arguments but 5 were given.
+2021-12-30 21:32:22: Failed while sending loading report to Company 1! Error:send_notification() takes 3 positional arguments but 5 were given.
 2021-12-30 21:32:22: Application is closed.
 2021-12-30 21:36:46: Application is closed.
-2021-12-30 21:37:11: Information of the Loading of 1 item succesfully sent to Company1.
+2021-12-30 21:37:11: Information of the Loading of 1 item succesfully sent to Company 1.
 2021-12-30 21:37:11: Information of the Loading of 1 item succesfully sent to Company 2.
 2021-12-30 21:37:11: Information of the Loading of 1 item succesfully sent to Company 3.
 2021-12-30 21:37:11: Application is closed.
@@ -363,7 +369,60 @@ def write_on_records(self, record):
 To see the output at the Cloud, click this link [Server Log](#server-log)
 
 ##### Notifier
-In order for it to continue its function stably, we need to be instantly aware of any errors that may occur. Possible error and shutdown events are sent to the technical team with the notification function.
+In order for it to continue its function stably, we need to be instantly aware of any errors that may occur. Possible error and close events are sent to the technical team with the notification function.
+```python
+def send_notification(self,subject,body):
+    try:
+        setting = self.setting_coll.find_one({"_id":"notifications"})
+        From = setting["admin"][0]["mail"]
+        Password = setting["admin"][0]["password"]
+
+        toList = []
+        ccList = []
+
+        settings = self.setting_coll.find_one({"_id":"notifications"})
+        for setting in settings:
+            if setting == "executive":
+                for adress in settings[setting]:
+                    ccList.append(adress["mail"])
+            elif setting == "technic":
+                for adress in settings[setting]:
+                    toList.append(adress["mail"])
+
+        msg = EmailMessage()
+        msg.set_content(body)
+        msg["Subject"] = subject
+        msg["From"] = From
+        msg["To"] = ",".join(toList)
+        msg["Cc"] = ",".join(ccList)
+
+        context=ssl.create_default_context()
+
+        with smtplib.SMTP("smtp.gmail.com", port=587) as smtp:
+            smtp.starttls(context=context)
+            smtp.login(msg["From"], Password)
+            smtp.send_message(msg)
+
+    except Exception as ex:
+        self.write_on_records(f"Error occured while sending notification to technic: {ex}")
+```
+###### Examples For Usage
+In case of Error  :
+```python
+except Exception as ex:
+        self.write_on_records(f"Failed while sending loading report to {company['_id']}! Error:{ex}.")
+        subject = "ERROR OCCURED AT THE SERVER"
+        body = f"Hello,\n\nError is shared below,\n{ex}\n\nLast Seen: {self.now}\n\n\nPlease do not reply this e-mail."
+        self.send_notification(subject,body)
+```
+In case of Unexpected Exit  :
+```python
+def closeEvent(self,event):
+    subject = "APPLICATION OF ORDER & LOAD IS CLOSED AT THE SERVER"
+    body = f"Hello,\n\nClose Event of the App is activated.\nLast Seen: {self.now}\n\nPlease do not reply this e-mail."
+    self.send_notification(subject,body)
+    self.write_on_records("Close Event of the Server App is successfully activated.")
+```
 
 ## Data Modelling
 
