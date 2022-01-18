@@ -341,8 +341,6 @@ def add_customer(self):
     self.clear_customer_settings()
   self.refresh_setting()
 ```
-
-
 ##### Edit a Customer
 ###### Step 1
 ```python
@@ -440,6 +438,14 @@ def load_settings_data(self):
         cargo_name = cargo["_id"]
         self.settings.ui.cargo_listWidget.addItem(cargo_name)
 ```
+### Order Form
+![order](https://user-images.githubusercontent.com/69144354/149923071-f4e49d7c-0e83-435d-85e7-eaf0905e052d.gif)
+
+### Main Window 
+![main](https://user-images.githubusercontent.com/69144354/149923111-59dbb7b8-d875-4268-8980-a02a9b109007.gif)
+
+### Report Form
+![report](https://user-images.githubusercontent.com/69144354/149923139-d512d177-0763-423c-a85e-33d1063c7cc6.gif)
 
 
 ## Server Application
@@ -663,6 +669,93 @@ At least the name entry is enough for the following structure to be formed on th
       ]
 }
 ```
+##### Synchronization of Products
+Business intelligence Software should often have a database or dataset into which products are integrated.
+In large-volume management information systems such as a ERP, products can also be added from the system. In this project, products were entered by using the **pandas** library from a ready dataset.
+
+Sample Dataset which is in same format with the one used in this project can be founded in the source file.
+```python
+import pandas as pd
+import pymongo
+
+#   Username and Password is needed to send a request to database
+username = ""
+password = ""
+#   File we want to sync with our database has to be shared here as a path
+file = r"C:\Users\Asus\Desktop\sample_products.xlsx"
+
+def synchronize(username,password,file,sheet_index):
+    myclient = pymongo.MongoClient(f"mongodb+srv://{username}:{password}@cluster0.asdnj.mongodb.net/app_test?retryWrites=true&w=majority")
+    mydb = myclient["order-load"]
+    product_coll = mydb["products"]
+
+    xl = pd.ExcelFile(file)
+
+    data_frame1 = xl.parse(sheet_index) 
+    index = data_frame1.index
+    number_of_rows = len(index) 
+
+    products = {}
+
+    for i in range(number_of_rows):
+
+        product_name = data_frame1["AD"][i]
+        product_code = str(data_frame1["RENK KOD"][i])[:-3]
+        color_code = data_frame1["RENK KOD"][i]
+        width = data_frame1["EN"][i]
+        composition = data_frame1["KOMPOZİSYON"][i]
+        weight = data_frame1["GR/M²"][i]
+        product_type = data_frame1["ÜRÜN CİNSİ"][i]
+        usage = data_frame1["KULLANIM ALANI"][i]
+        supplier_name = data_frame1["TEDARİKÇİ"][i]
+        supplier_product_name = data_frame1["TEDARİKÇİ AD"][i]
+        supplier_product_color = data_frame1["TEDARİKÇİ RENK KOD"][i]
+
+        if product_name is not None:
+            if product_name in products:
+                products[product_name]["color_codes"].append({"color_code":color_code})
+            else: 
+                products[product_name] = {
+                    "code":product_code,
+                    "supplier":supplier_name,
+                    "supplier_product_name":supplier_product_name,
+                    "type":product_type,
+                    "usage":usage,
+                    "width":width,
+                    "weight":weight,
+                    "composition":composition,
+                    "color_codes" : [{"color_code":color_code}]
+                 }
+        else:
+            continue
+        
+    product_data = {}
+
+    for product in products:
+        try:
+            product_data = {
+                "_id" : product,
+                "code":products[product]["code"],
+                "supplier":products[product]["supplier"],
+                "supplier_product_name":products[product]["supplier_product_name"],
+                "type":products[product]["type"],
+                "usage":products[product]["usage"],
+                "width":products[product]["width"],
+                "weight":products[product]["weight"],
+                "composition":products[product]["composition"],
+                "color_codes" : []
+                }
+            for i in range(len(products[product]['color_codes'])):
+                product_data["color_codes"].append(products[product]['color_codes'][i]['color_code'])
+            product_coll.insert_one(product_data)
+        except pymongo.errors.DuplicateKeyError:
+            continue
+            
+if __name__ == "__main__":
+    synchronize(username,password,file,0)
+    synchronize(username,password,file,1)
+```
+
 ### Orders
 
 Below is an example of **correlating data**. In the Company Name field, **customers** collection must match the information in the **"_id"** field. This matching takes place when the order is entered. The same applies to cargo and product informations.
