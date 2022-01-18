@@ -22,7 +22,7 @@ Navigate Chapters,
     - [MongoDB](#mongodb)
     - [Others](#others)
 - [User Interface](#userinterface)
-  - [Login & Splash](#login-&-splash) 
+  - [Splash & Login](#splash-&-login) 
   - [Main Window](#mainwindow)
 - [Server App](#server)
 - [Data Modelling](#data-modelling)
