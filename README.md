@@ -275,7 +275,18 @@ else:
     with open("settings.json","w",encoding="utf-8") as file:
         json.dump(settings, file)
 ```
+## Server Application
+The main purpose of the Server Application is to send a report which contains daily loadings to the relevant customers at the end of the day.
+For this reason, **timer**, **filter**, **recorder** and **notifier** functions in this application are important. We will evaluate this application under these headings.
 
+![server](https://user-images.githubusercontent.com/69144354/149890024-821fbed0-1021-4442-94a5-f3c1ff1ac4f4.gif)
+
+
+##### Timer
+##### Filter
+##### Recorder
+##### Notifier
+In order for it to continue its function stably, we need to be instantly aware of any errors that may occur. Possible error and shutdown events are sent to the technical team with the notification function.
 
 ## Data Modelling
 
