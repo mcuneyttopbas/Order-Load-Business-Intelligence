@@ -666,6 +666,7 @@ In order to ensure stability, it is important to be aware of errors quickly as w
       ]
 }
 ```
+To go back, click this link [Recorder](#recorder)
 ##### Refreshing the Array of Records
 Over time, the data here will grow and the old data will become meaningless. Therefore, there is a need to create a self-cleaning algorithm like the one below.
 ```python
