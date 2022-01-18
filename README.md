@@ -21,7 +21,9 @@ Navigate Chapters,
 - [User Interface](#user-interface)
   - [Splash & Login](#splash--login) 
   - [Settings Forms](#settings-forms)
-  - [Main Window](#mainwindow)
+  - [Order Form](#order-form)
+  - [Main Window](#main-window)
+  - [Report Form](#report-form)
 - [Server Application](#server-application)
   - [Timer](#timer) 
   - [Filter](#filter) 
@@ -37,7 +39,6 @@ Navigate Chapters,
 - [How to Contribute?](#how-to-contribute)
 
   
-
 ## Introduction
 
 It enables to make processes safer and faster in terms of operation and follow-up until the added orders are shipped.
@@ -439,12 +440,340 @@ def load_settings_data(self):
         self.settings.ui.cargo_listWidget.addItem(cargo_name)
 ```
 ### Order Form
+An order can be added as it has Customer and Cargo information as well. The Order Form was created to add an order. Some partial edits can be performed from the [Main Window](#main-window).
+
 ![order](https://user-images.githubusercontent.com/69144354/149923071-f4e49d7c-0e83-435d-85e7-eaf0905e052d.gif)
+#### Searching Products or Codes
+In cases where the number of products and their variants is high, the best way to perform fast and error-free transactions is to create a good search mechanism.
+##### Shortcut to Access Searching Form
+From imported class named OrderWindow(), a "self.order" object is created.
+Documents which is imported in the codes below can be seen in source files.
+```python
+from orderForm.order import OrderWindow 
+self.order = OrderWindow()
+```
+Object of QShortcut is created as a child of Order Form class 
+```python
+self.shortcut_open1 = QShortcut(QKeySequence('F1'), self.order)
+self.shortcut_open1.activated.connect(self.open_searchingForm)
+```
+###### Function
+```python
+def open_searchingForm(self):
+  try:
+      if self.selected_column == 0: # If selected Column is "0", that means the user is looking for a product
+          text = self.order.ui.table_details.item(self.selected_row, self.selected_column)
+          if text is not None:
+              print(text.text())
+              self.searching_form.ui.txt_search.setText(text.text())
+              for product in self.product_coll.find({"_id":{"$regex": f"^{text.text().upper()}"}}):
+                  product_name = product["_id"]
+                  self.searching_form.ui.searching_list.addItem(str(product_name))
+              self.searching_form.show()
+          else:
+              self.searching_form.ui.txt_search.setText("")
+              for product in self.product_coll.find().sort("_id",1):
+                  product_name = product["_id"]
+                  self.searching_form.ui.searching_list.addItem(str(product_name))
+              self.searching_form.show()
+
+      elif self.selected_column == 1: #If selected Column is "1", it assumes that the user is looking for color codes of a product already choosen
+          text = self.order.ui.table_details.item(self.selected_row, self.selected_column)
+          if text is not None:
+              self.searching_form.ui.txt_search.setText(text.text())
+              product_name = self.order.ui.table_details.item(self.selected_row, 0)
+              if product_name is not None: # It check if product is choosen or not
+                  for product in self.product_coll.find({"_id": product_name.text().upper}):
+                      lenght = len(product["color_codes"])
+                      for i in range(lenght):
+                          if text.text() in product["color_codes"][i][-2:]:
+                              self.searching_form.ui.searching_list.addItem(product["color_codes"][i])
+                  self.searching_form.show()
+              else:
+                  self.warning_messageBox("Ürün seçimi yapılmadı!")
+
+          else:
+              product_name = self.order.ui.table_details.item(self.selected_row, 0)
+              if product_name is not None:
+                  for product in self.product_coll.find({"_id": product_name.text().upper()}):
+                      lenght = len(product["color_codes"])
+                      for i in range(lenght):
+                          self.searching_form.ui.searching_list.addItem(product["color_codes"][i])
+                  self.searching_form.show()
+              else:
+                  self.warning_messageBox("Ürün seçimi yapılmadı!")
+
+  except AttributeError:
+      print("F1 Kynaklı attribute error çalıştı")
+      self.set_focus()
+  except  pymongo.errors.PyMongoError:
+      self.warning_messageBox("İnternet bağlantınızı kontrol ediniz!")
+      self.order.close()
+```
+
+#### UI of the Form
+Important interface features such as loading of customer and cargo details in the combobox of Order Form and, if selected, accompanying their information and adding a new line automatically as the line progresses, are mentioned below.
+
+##### Loading Necessary Datas to Form
+###### Step 1
+```python
+self.order.ui.cb_cargos.clear()
+self.order.ui.cb_customers.clear()
+
+# If any item is selected 
+# To load Customer Combobox with customer infos
+self.order.ui.cb_customers.addItem(" ")
+for customer in self.customer_coll.find():
+    customer_name = customer["_id"]
+    self.order.ui.cb_customers.addItem(customer_name)
+
+# To load Cargo Combobox with cargo infos
+self.order.ui.cb_cargos.addItem(" ")
+for cargo in self.cargo_coll.find():
+    cargo_name = cargo["_id"]
+    self.order.ui.cb_cargos.addItem(cargo_name)  
+    
+    
+today = date.today()
+year = today.year
+month = today.month
+day = today.day
+
+self.order.ui.order_date.setDate(QtCore.QDate(year, month, day)) # Load the current date to QtDate 
+
+self.order.ui.table_details.selectionModel().selectionChanged.connect(self.on_selectionChanged) # When user tabs to last cell, one more row is crated by itself
+self.order.ui.cb_cargos.currentTextChanged.connect(self.transfer_info_on_form)                  # Transfer selected customer's info to relevant QtLineEdits
+self.order.ui.cb_customers.currentTextChanged.connect(self.transfer_info_on_form)               # Transfer selected cargo's info to relevant QtLineEdits
+```
+###### Step 2
+This function is called only if item of combobox of customer or cargo is changed, change actually means user choosed a one
+```python
+def transfer_info_on_form(self):
+  try:
+      if self.cargo_coll.find_one({"_id":self.order.ui.cb_cargos.currentText()}) is not None:
+          cargo = self.cargo_coll.find_one({"_id":self.order.ui.cb_cargos.currentText()})
+          if self.order.ui.cb_cargos is not None:
+              self.order.ui.txt_ship_adress.setText(cargo["adress"])
+              self.order.ui.txt_ship_tel.setText(cargo["phone"])
+      else:
+          self.order.ui.txt_ship_adress.clear()
+          self.order.ui.txt_ship_tel.clear()              
+
+      if self.customer_coll.find_one({"_id":self.order.ui.cb_customers.currentText()}) is not None:
+          customer = self.customer_coll.find_one({"_id":self.order.ui.cb_customers.currentText()})
+          if self.order.ui.cb_cargos is not None:
+              self.order.ui.txt_receiver_name.setText(customer["_id"])
+      else:
+          self.order.ui.txt_receiver_name.setText("")
+
+  except  pymongo.errors.PyMongoError:
+      self.warning_messageBox("İnternet bağlantınızı kontrol ediniz!")
+      self.order.close()
+```
+##### Automatic Row Adding to QTableWidget
+###### Step 1
+That line of code is written to detect ant change of selection on the QTableWidget
+```python
+self.order.ui.table_details.selectionModel().selectionChanged.connect(self.on_selectionChanged)
+```
+###### Step 2
+After detecting change on the QTableWidget, function below is check if selected row and column are the last ones. If it is True, then add a new row.
+```python
+def on_selectionChanged(self,selected):
+    for ix in selected.indexes():
+        print(f"Selected Cell Location Row {ix.row()} , Column {ix.column()}")
+        self.selected_column = ix.column()
+        print(f"selected column {self.selected_column}")
+        self.selected_row = ix.row()
+        print(f"selected row {self.selected_row}")
+        rowCount = self.order.ui.table_details.rowCount()
+        columnCount = self.order.ui.table_details.columnCount()
+        if ix.row() == (rowCount-1) and ix.column() == (columnCount-1):
+            self.order.ui.table_details.insertRow(rowCount)
+```
+#### Adding Order
+When adding an order, it is sufficient to enter the company name and at least one product with all its information. As it is a sensitive stage as well as important,that is why management of errors is also a imperative.
+
+```python
+def save_order(self):
+    try:
+        
+        company = self.order.ui.cb_customers.currentText()
+        # Receiver Details
+        receiver = self.order.ui.txt_receiver_name.text()
+        authority = self.order.ui.txt_author.text()
+        company_phone = self.order.ui.txt_cust_tel.text()
+        company_gsm = self.order.ui.txt_gsm_tel.text()
+        company_adress = self.order.ui.txt_cust_adress.text()
+
+        # Shipment Details 
+        shipper_name = self.order.ui.cb_cargos.currentText()
+        customer_code = self.order.ui.txt_customer_code.text()
+        ship_type = self.order.ui.txt_ship_type.text()
+        ship_phone = self.order.ui.txt_ship_tel.text()
+        ship_adress = self.order.ui.txt_ship_adress.text()
+
+        # Order Date
+        order_date = self.order.ui.order_date.text()
+
+        # Order Creation Date
+        created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        # To create a specific code for each order
+        order_code = self.create_orderCode(company)
+
+        # Transferring datas to a dictionary to send database together
+        self.order_data = {
+            "_id": order_code,
+            "Company Name" : company,
+            "Crated_by":self.username,
+            "Created_at": created_at,
+            "Order_at" : order_date,
+            "Receiver Info" : {
+                "Receiver Name" : receiver,
+                "Authority" : authority,
+                "Company Phone" : company_phone,
+                "Company GSM" : company_gsm,
+                "Company Adress" : company_adress
+            },
+            "Shipping Info" : {
+                "Shipper Name" : shipper_name,
+                "Customer Code": customer_code,
+                "Shipping Type" : ship_type,
+                "Shipper Phone" : ship_phone,
+                "Shipper Adress":ship_adress
+            },
+            "Order Details" : {}
+        }
+        rowCount = self.order.ui.table_details.rowCount()
+        print(rowCount)
+
+        for row in range(rowCount):
+            for column in range(3):
+                if self.order.ui.table_details.item(row,column) is None:
+                    print(f"{self.order.ui.table_details.item(row,column)} was None")
+                    self.order.ui.table_details.setItem(row,column,QTableWidgetItem(""))
+                else:
+                    print("buldu")
+        feedback = ""
+        line = 1
+        for row in range (rowCount):
+            if self.order.ui.table_details.item(row,1) is None and self.order.ui.table_details.item(row,0) is None and self.order.ui.table_details.item(row,2) is None:
+                print("skipped the row")
+            elif self.order.ui.table_details.item(row,1).text() == "" and self.order.ui.table_details.item(row,0).text() == ""  and self.order.ui.table_details.item(row,2).text() == "":
+                print("skipped the row")
+            else:
+                if self.order.ui.table_details.item(row,1).text() != "" and self.order.ui.table_details.item(row,0).text() != "" and self.order.ui.table_details.item(row,2).text() != "":
+                    product_name = self.order.ui.table_details.item(row,0).text().upper()
+                    color = self.order.ui.table_details.item(row,1).text()
+                    meter = self.order.ui.table_details.item(row,2).text()
+
+
+                    product = self.product_coll.find_one({"_id":product_name})
+                    if product is not None:
+                        if color in product["color_codes"]:
+                            if self.isFloat(meter) == True:
+                                self.order_data["Order Details"][str(line)] = {
+                                    "Status": "new",
+                                    "Item" : product_name,
+                                    "Color" : color,
+                                    "Meter" : meter,
+                                    "Note"  :   "",
+                                    "Delivered_at":"Henüz Teslim Edilmedi"
+                                }   
+                                line += 1
+                                feedback += f"{str(row + 1):3}{product_name:10}{color:10}  {meter:5}MT\n"
+                            else: 
+                                if self.isInt(meter) == True:
+                                    self.order_data["Order Details"][str(line)] = {
+                                        "Status": "new",
+                                        "Item" : product_name,
+                                        "Color" : color,
+                                        "Meter" : meter,
+                                        "Note"  :   "",
+                                        "Delivered_at":"Henüz Teslim Edilmedi"
+                                    }
+
+                                    line += 1
+                                    feedback += f"{str(row + 1):3}{product_name:10}{color:10}  {meter:5}MT\n"  
+                                else:
+                                    raise Exception(f"Metre Bilgisi doğru girilmedi\n\nHatalı İşlem: {meter}\nSatır Sırası: {row+1}")
+                        else:
+                            raise Exception(f"Ürün Kodu Bulunamadı\n\nHatalı İşlem: {color}\nSatır Sırası: {row+1}")
+                    else:
+                        raise Exception(f"Ürün Bulunamadı\n\nHatalı İşlem: {product_name}\nSatır Sırası: {row+1}")
+                else:
+                    raise Exception(f"Detay bulunamadı\n\nSatır Sırası: {row+1}")
+
+
+        if order_code is None :
+            raise AttributeError
+        if len(self.order_data["Order Details"]) == 0:
+            raise Exception(f"Sipariş Detayı Bulunamadı")
+
+        self.order.ui.lbl_order_code.setText(order_code)
+        self.order.ui.lbl_date.setText(created_at)
+
+        print(self.order_data)
+        self.not_freeze_the_form(False)
+        time.sleep(1)
+        self.feedback_messageBox(order_code,"eklendi")
+        self.order.close()
+        self.refresh_form()
+        self.not_freeze_the_form(True)
+        self.order_coll.insert_one(self.order_data)
+```
+
+#### Generating & Ordering Order Codes
+###### Algorithm
+Order codes must be unique. At the same time, the codes should give the user an idea about the details of the order. For this reason, each time an order is entered, an order code that is different but contains information such as **Company Name** and **Date** should be generated.
+```
+Order Code = First 3 Letter Of the Company Name + Date + Amount of Repeat
+```
+However, some customers may want to add the codes they have determined to the order code in order to track the work. In order to respond to such requests, Order & Load offers the opportunity to choose the extra order code while adding customers. 
+
+![extra_code](https://user-images.githubusercontent.com/69144354/149934221-9714073a-d709-4565-8121-5e5cecdbfe09.jpg)
+
+That **Extra Code** is asked with QDialog when **Save** button is clicked. In this case, if **Extra Code** is selected Order Code logic will be like below,
+```
+Order Code = First 3 Letter Of the Company Name + Date + Extra Code
+```
+###### Function
+```python
+def create_orderCode(self,company):
+  try:
+      order_date = self.order.ui.order_date.text().split(".")
+      if len(order_date[0]) == 1:
+          day = order_date[0] 
+          order_date[0] = "0" + day
+      ##### check if any other order at the same time
+      repeat = 1
+
+      for order in self.order_coll.find():
+          while company[:3] + order_date[0] + order_date[1] + order_date[2][2:] + "-" + str(repeat) == order["_id"]:
+              repeat +=1
+
+      customer = self.customer_coll.find_one({"_id":company})
+      isSubscribe = customer["extra_code"]
+      if isSubscribe == True:
+          text, ok = QInputDialog.getText(self.order,"Ek Sipariş Kodu","Kodu Gir:")
+          if ok and text is not None:
+                  repeat = text
+
+      return company[:3] + order_date[0] + order_date[1] + order_date[2][2:] + "-" + str(repeat)
+
+  except TypeError:
+      print("TypeError: Company Info is None")
+      self.warning_messageBox("Lütfen Firma Seçimi Yapınız!")
+```
+
 
 ### Main Window 
 ![main](https://user-images.githubusercontent.com/69144354/149923111-59dbb7b8-d875-4268-8980-a02a9b109007.gif)
 
 ### Report Form
+
+
 ![report](https://user-images.githubusercontent.com/69144354/149923139-d512d177-0763-423c-a85e-33d1063c7cc6.gif)
 
 
