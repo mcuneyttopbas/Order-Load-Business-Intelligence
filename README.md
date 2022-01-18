@@ -1,6 +1,6 @@
 # Order & Load Business Intelligence v1
 
-This document presents the Order & Load BI Software in 3 main sections under the headings of Introduction, Desktop User Application, Server Application and Data Modeling with
+This document presents the Order & Load BI Software in 4 main chapters under the headings of Introduction, Desktop User Application, Server Application and Data Modeling with
 MongoDB. It aims to enrich the content with Gifs and Screenshots.
 
 In order to make sense of the codes, it is important to have basic knowledge of Python, pymongo and pyqt5.
@@ -10,9 +10,9 @@ rather than making commercial gains.
 
 **Note** : Instead of saying "it could have been better this way or that" many times in the document, I would like to state that I did not prepare much for the project in advance,
 it grew on its own as I added new features and I did it to enjoy it. Therefore, in order to see the result,
-you can see that I skipped some requirements when you take a look at the codes.
+I skipped some requirements when you take a look at the codes.
 However, I would like to underline that it has features that can answer the questions of many developers I encountered during my research.
-When I started the project, I was new to the libraries I used, but with my current knowledge, I believe that I can finish this project, which I finished in 3 weeks, in half time.
+When I started the project, I was new to the libraries I used, but with my current knowledge, I believe that I can finish this project in half time, which I finished in 3 weeks.
 
 Navigate Chapters,
 - [Introduction](#introduction)
@@ -104,6 +104,15 @@ Below you can see some of the frequently asked questions by the developers, whic
 -	How to manage settings locally with json file?
 -	How to read file and apply data with Pandas library?
 -	How to synchronize data and export to excel file with Openpyexcel library?
+
+## User Interface
+
+In this chapter, the windows that represent the front-end of the application, the structure that makes it functional, and the database management will also be mentioned. 
+This UI is designed in Turkish to be able to be tested by users.
+
+### Splash & Login
+![splash-login](https://user-images.githubusercontent.com/69144354/149879188-f9296f40-b7d1-43ca-be83-8ed56147ce7f.gif)
+
 
 ## Data Modelling
 
