@@ -279,9 +279,168 @@ else:
         json.dump(settings, file)
 ```
 ### Settings Forms
-Assuming there is no data in the database yet, customer and shipping information must be added first to take advantage of the program's functions.
+Assuming there is no data in the database yet except products, customer and shipping information must be added first to take advantage of the program's functions.
 
 ![settings](https://user-images.githubusercontent.com/69144354/149901521-f0b5e4f3-03a5-47e1-a1dc-9159cc0f2404.gif)
+
+In order to create the structure above, some important steps are shared below.
+#### Management of the Data
+##### Add a Customer
+###### Step 1
+A Stacked Widget is set to organize Customers and Cargos Menus at the same widget so if a user information is going to be added, then we need to set a current index detail for the stacked widget.
+```python
+def open_customer_settings_to_add(self):
+    self.setting_form.ui.stackedWidget.setCurrentIndex(0)
+    self.setting_form.show()
+```
+
+###### Step 2
+Signal-Slot to detect a press on the **Save** Button
+```python
+self.setting_form.ui.btn_save_customer.clicked.connect(self.add_customer)
+```
+Function
+```python
+def add_customer(self):
+  try:
+    if self.setting_form.ui.txt_company is not None:  # It must be sure that at least Company name is entered to make a query
+        print("not none olduğu tespit edildi")
+        company = self.setting_form.ui.txt_company.text()
+        mail1 = self.setting_form.ui.txt_mail1.text()
+        mail2 = self.setting_form.ui.txt_mail2.text()
+        mail3 = self.setting_form.ui.txt_mail3.text()
+        extra_code = self.setting_form.ui.cb_extra_code.isChecked()
+        notification = self.setting_form.ui.cb_notification.isChecked()
+
+        self.customer_data = {
+            "_id"  :company,
+            "mail1" :mail1,
+            "mail2" :mail2,
+            "mail3" :mail3,
+            "extra_code":extra_code,
+            "notification":notification
+        } 
+        self.customer_coll.insert_one(self.customer_data)
+        self.feedback_messageBox(company,"eklendi")
+        self.setting_form.close()
+        self.clear_customer_settings()
+
+  except pymongo.errors.DuplicateKeyError: # This Exception is used when editing the customer document. 
+    self.customer_coll.update_one(
+        {"_id" : company,},
+        {"$set": {
+         "mail1":mail1,
+         "mail2":mail2,
+         "mail3":mail3,
+         "extra_code":extra_code,
+         "notification":notification
+        }}
+    )
+    self.feedback_messageBox(company,"düzenlendi")
+    self.setting_form.close()
+    self.clear_customer_settings()
+  self.refresh_setting()
+```
+
+
+##### Edit a Customer
+###### Step 1
+```python
+def open_customer_settings_to_edit(self):
+        item = self.select_clicked_item(self.settings.ui.customer_listWidget)
+        customer = self.customer_coll.find_one({"_id":item.text()})
+        
+        # Details of the Customer is coming from the Database via "_id" info that we can access from List Widget
+        self.setting_form.ui.txt_company.setText(item.text())     
+        self.setting_form.ui.txt_company.setEnabled(False)
+        self.setting_form.ui.txt_mail1.setText(customer["mail1"]) 
+        self.setting_form.ui.txt_mail2.setText(customer["mail2"])
+        self.setting_form.ui.txt_mail3.setText(customer["mail3"])
+        self.setting_form.ui.cb_extra_code.setChecked(customer["extra_code"])
+        self.setting_form.ui.cb_notification.setChecked(customer["notification"])
+
+        self.setting_form.ui.stackedWidget.setCurrentIndex(0)
+        self.setting_form.show()
+```
+Cick on this link to see how to select a item of QListWidget, [Selecting Items of QListWidget](#selecting-items-of-qlistwidget)
+###### Step 2
+As you can see below, same fuction which is used adding is used here as well, thanks to Exception function can detect if it is a adding or editing. If MongoDb throws a **"Duplicate"** error that means there is one more with the same "_id" so this is a editing.
+
+Signal-Slot to detect a press on the **Save** Button
+```python
+self.setting_form.ui.btn_save_customer.clicked.connect(self.add_customer)
+```
+Function
+```python
+def add_customer(self):
+  try:
+    if self.setting_form.ui.txt_company is not None:  # It must be sure that at least Company name is entered to make a query
+        print("not none olduğu tespit edildi")
+        company = self.setting_form.ui.txt_company.text()
+        mail1 = self.setting_form.ui.txt_mail1.text()
+        mail2 = self.setting_form.ui.txt_mail2.text()
+        mail3 = self.setting_form.ui.txt_mail3.text()
+        extra_code = self.setting_form.ui.cb_extra_code.isChecked()
+        notification = self.setting_form.ui.cb_notification.isChecked()
+
+        self.customer_data = {
+            "_id"  :company,
+            "mail1" :mail1,
+            "mail2" :mail2,
+            "mail3" :mail3,
+            "extra_code":extra_code,
+            "notification":notification
+        } 
+        self.customer_coll.insert_one(self.customer_data)
+        self.feedback_messageBox(company,"eklendi")
+        self.setting_form.close()
+        self.clear_customer_settings()
+
+  except pymongo.errors.DuplicateKeyError: # This Exception is used when editing the customer document. 
+    self.customer_coll.update_one(
+        {"_id" : company,},
+        {"$set": {
+         "mail1":mail1,
+         "mail2":mail2,
+         "mail3":mail3,
+         "extra_code":extra_code,
+         "notification":notification
+        }}
+    )
+    self.feedback_messageBox(company,"düzenlendi")
+    self.setting_form.close()
+    self.clear_customer_settings()
+  self.refresh_setting()
+```
+##### Remove a Customer
+```python
+item = self.select_clicked_item(self.settings.ui.customer_listWidget)
+if item is not None:
+    self.customer_coll.delete_one({"_id":item.text()})
+    self.feedback_messageBox(item.text(),"silindi")
+    self.refresh_setting()
+```
+
+#### Selecting Items of QListWidget
+```python
+def select_clicked_item(self,listWidget):
+    index = listWidget.currentRow()
+    item = listWidget.item(index)
+
+    return item
+```
+#### Display Settings of QListWidget
+```python 
+def load_settings_data(self):
+    for customer in self.customer_coll.find():
+        customer_name = customer["_id"]
+        self.settings.ui.customer_listWidget.addItem(customer_name)
+
+    for cargo in self.cargo_coll.find():
+        cargo_name = cargo["_id"]
+        self.settings.ui.cargo_listWidget.addItem(cargo_name)
+```
+
 
 ## Server Application
 The main purpose of the Server Application is to send a report which contains daily loadings to the relevant customers at the end of the day.
