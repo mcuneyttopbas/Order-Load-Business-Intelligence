@@ -18,11 +18,9 @@ Navigate Chapters,
 - [Introduction](#introduction)
   - [Functions](#functions)
   - [FAQ](#faq)
-    - [PyQt5](#pyqt5)
-    - [MongoDB](#mongodb)
-    - [Others](#others)
 - [User Interface](#user-interface)
   - [Splash & Login](#splash--login) 
+  - [Settings Forms](#settings-forms)
   - [Main Window](#mainwindow)
 - [Server Application](#server-application)
   - [Timer](#timer) 
@@ -36,6 +34,7 @@ Navigate Chapters,
   - [Orders](#orders)
   - [Notifications](#notifications)
   - [Server Log](#server-log)
+- [How to Contribute?](#how-to-contribute)
 
   
 
@@ -86,7 +85,7 @@ Below is a general summary of the program's functions.
 -	Automatically Transmitting Shutdown or Error situations that may occur in the Server Application to the technical unit in an instant mail format
 
 ### FAQ
-Below you can see some of the frequently asked questions by the developers, which you can find answers to or get ideas from in this project.
+Below you can see some of the frequently asked questions by the developers in several platform, which you can find answers to or get ideas from in this project.
 #### PyQt5
 -	How to make a multi-window application with PyQt5?
 -	What kind of errors need to be avoided when developing a multi-window application with PyQt5?
@@ -279,6 +278,11 @@ else:
     with open("settings.json","w",encoding="utf-8") as file:
         json.dump(settings, file)
 ```
+### Settings Forms
+Assuming there is no data in the database yet, customer and shipping information must be added first to take advantage of the program's functions.
+
+![settings](https://user-images.githubusercontent.com/69144354/149901521-f0b5e4f3-03a5-47e1-a1dc-9159cc0f2404.gif)
+
 ## Server Application
 The main purpose of the Server Application is to send a report which contains daily loadings to the relevant customers at the end of the day.
 For this reason, **timer**, **filter**, **recorder** and **notifier** functions in this application are important. We will evaluate this application under these headings.
