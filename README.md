@@ -22,6 +22,7 @@ Navigate Chapters,
     - [MongoDB](#mongodb)
     - [Others](#others)
 - [User Interface](#userinterface)
+  - [Login & Splash](#login-&-splash) 
   - [Main Window](#mainwindow)
 - [Server App](#server)
 - [Data Modelling](#data-modelling)
@@ -111,7 +112,169 @@ In this chapter, the windows that represent the front-end of the application, th
 This UI is designed in Turkish to be able to be tested by users.
 
 ### Splash & Login
+It would be more appropriate to evaluate the Splash and Login screens together because users cannot intervene until the login screen is opened.
+
 ![splash-login](https://user-images.githubusercontent.com/69144354/149879188-f9296f40-b7d1-43ca-be83-8ed56147ce7f.gif)
+
+#### Splash 
+The Splash Screen has been added to the program symbolically. It is aimed to give an idea about how creative work can be done on the frontend with the PyQt library.
+##### Progress Bar Animation
+```python
+class  SplashScreen(QtWidgets.QMainWindow):
+  def __init__(self):
+      super(SplashScreen,self).__init__()
+
+      self.ui = Ui_MainWindow()
+      self.ui.setupUi(self)
+      self.additional_UiSetup()
+
+      self.ui.label_softwareName.setText("ORDER & LOAD BUSINESS INTELLIGENCE SOFTWARE v1")
+      
+      # Starting Value of the Progress Bar
+      self.counter = 0
+
+      # Timer 
+      self.timer = QtCore.QTimer()
+      self.timer.timeout.connect(self.progress) # That is a signal which detect the timeout to call the function of the "progress"
+      self.timer.start(35)
+
+  def progress(self):
+  # Setting Starting Value of the Splash Screen
+  self.ui.progressBar.setValue(self.counter)
+  
+  # To rise the Value of the Progress Bar
+  self.counter += 1 
+
+  if self.counter > 70:
+      self.ui.lbl_loading.setText("configurations setting...")
+
+  if self.counter > 80:
+      self.ui.lbl_loading.setText("data proccessing...")
+
+  if self.counter > 95:
+      self.ui.lbl_loading.setText("app started.")
+
+  if self.counter > 100:
+      self.ui.check_close.setChecked(True)
+      self.timer.stop()
+      self.close()
+ ```
+##### Frameless Design
+```python
+def additional_UiSetup(self):
+  # To set the Widget Frameless
+  flags = QtCore.Qt.WindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+  self.setWindowFlags(flags)
+
+  # To remove the background of the Widget
+  self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+
+  # To set Shadow Effect on the Widget
+  self.shadow = QGraphicsDropShadowEffect(self)
+  self.shadow.setBlurRadius(20)
+  self.shadow.setXOffset(0)
+  self.shadow.setYOffset(0)
+  self.shadow.setColor(QtGui.QColor(0,0,0,60))
+  self.ui.dropShadowFrame.setGraphicsEffect(self.shadow)
+```
+#### Login
+It is important to mention two important functions in this section. One of them is Username and Password control and the other is the storage of these information.
+##### Control Mechanism
+Verifying user information is the most important part of applications in terms of security. As a method, it may be possible to read the scripts of some encrypted files from an online repo. However, it would be more practical and secure for an application of this scale to have MongoDB do this control phase.
+
+To summarize, every time the login button is pressed, it places the username and password information in the MongoDB **Connection String** and sends a query. If an **Authorization Error** is returned, it indicates incorrect information.
+
+```python
+def check_user(self):
+        print("User informations is checked.")
+        username_entry = self.login.ui.txt_username.text() 
+        password_entry = self.login.ui.txt_password.text()
+
+    #   To use this method, users must be already created at database 
+    #   Thanks to that, mongodb database check if username and password is valid or not by itself.
+    try:                         
+        self.myclient = pymongo.MongoClient(f"mongodb+srv://{username_entry}:{password_entry}@cluster0.asdnj.mongodb.net/app_test?retryWrites=true&w=majority")
+        self.mydb = self.myclient["order-load"]
+        self.customer_coll = self.mydb["customers"]
+        self.cargo_coll = self.mydb["cargos"]
+        self.order_coll = self.mydb["orders"]
+        self.product_coll = self.mydb["products"]
+        self.setting_coll = self.mydb["settings"]
+        result = self.customer_coll.find_one() #  This one is used to send a request to database to be sure if user is valid or not.
+
+        self.username = self.login.ui.txt_username.text() 
+        self.password = self.login.ui.txt_password.text()
+
+        print(f"User '{self.username}' in online.")
+        self.login.close()
+        self.load_data_to_windows()
+
+        if self.login.ui.checkBox.isChecked() == True:
+            with open("settings.json","r",encoding="utf-8") as file:
+                settings = json.load(file) 
+            settings["remember_me"]["isChecked"] = True
+            settings["remember_me"]["username"] = self.username
+            settings["remember_me"]["password"] = self.password
+            with open("settings.json","w",encoding="utf-8") as file:
+                json.dump(settings, file)
+        else:
+            with open("settings.json","r",encoding="utf-8") as file:
+                settings = json.load(file) 
+            settings["remember_me"]["isChecked"] = False
+            settings["remember_me"]["username"] = ""
+            settings["remember_me"]["password"] = ""
+            with open("settings.json","w",encoding="utf-8") as file:
+                json.dump(settings, file)
+
+        self.window.ui.lbl_user.setText(self.username)
+        self.window.show()
+
+    #   If Username or password is not valid mongodb throws a Authorizaiton error
+    #   When program catch this error, that means username or password is not valid. 
+    except pymongo.errors.OperationFailure and pymongo.errors.InvalidURI and pymongo.errors.OperationFailure:
+        self.login.hide()
+        msg = QMessageBox()
+        msg.setWindowTitle("Geçersiz İşlem")
+        msg.setText("Kullanıcı Adı veya Parola yanlış!")
+        msg.setIcon(QMessageBox.Warning)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.setWindowIcon(QtGui.QIcon('icon.png'))
+        msg.activateWindow()
+        msg.raise_()
+        x = msg.exec_()
+        self.login.show()
+```
+##### Storage of Username and Password
+In order to store this information, there is a json type document waiting locally.
+###### settings.json
+```json
+{
+  "remember_me": {
+  "isChecked": true,
+  "username": "cuneyttopbas",
+  "password": "cuneyttopbas123"
+  }
+}
+```
+The codes below are read without opening the login screen. The structure constructed here is based on reading the **settings.json** page first. If the value of the **"isChecked"** key is **"true"**, it transfers the user information from the same file directly to the login screen.
+```python
+if self.login.ui.checkBox.isChecked() == True:
+    with open("settings.json","r",encoding="utf-8") as file:
+        settings = json.load(file) 
+    settings["remember_me"]["isChecked"] = True
+    settings["remember_me"]["username"] = self.username
+    settings["remember_me"]["password"] = self.password
+    with open("settings.json","w",encoding="utf-8") as file:
+        json.dump(settings, file)
+else:
+    with open("settings.json","r",encoding="utf-8") as file:
+        settings = json.load(file) 
+    settings["remember_me"]["isChecked"] = False
+    settings["remember_me"]["username"] = ""
+    settings["remember_me"]["password"] = ""
+    with open("settings.json","w",encoding="utf-8") as file:
+        json.dump(settings, file)
+```
 
 
 ## Data Modelling
