@@ -24,7 +24,11 @@ Navigate Chapters,
 - [User Interface](#user-interface)
   - [Splash & Login](#splash--login) 
   - [Main Window](#mainwindow)
-- [Server App](#server)
+- [Server Application](#server-application)
+  - [Timer](#timer) 
+  - [Filter](#filter) 
+  - [Recorder](#recorder) 
+  - [Notifier](#recorder) 
 - [Data Modelling](#data-modelling)
   - [Customers](#customers) 
   - [Cargos](#cargos)
@@ -281,10 +285,83 @@ For this reason, **timer**, **filter**, **recorder** and **notifier** functions 
 
 ![server](https://user-images.githubusercontent.com/69144354/149890024-821fbed0-1021-4442-94a5-f3c1ff1ac4f4.gif)
 
-
 ##### Timer
+It is necessary to wait for the end of the shift at least in order to transmit the daily reports. It is necessary to have at least one timer to wait for the end of the shift.
+```python
+from PyQt5.QtCore import QTimer, QTime
+from datetime import datetime, date
+
+class ServerWidget(QtWidgets.QMainWindow):
+    def __init__(self,username,password):
+        super(ServerWidget,self).__init__()
+        
+        timer = QTimer(self)
+        timer.timeout.connect(self.display_time)
+        timer.start(1000)  
+        
+    def set_time(self):
+        self.today = date.today()
+        self.year = self.today.year
+        self.month = self.today.month
+        self.day = self.today.day
+        self.this_date_object = datetime(int(self.year), int(self.month),int(self.day-1),int(18))
+        self.now = datetime.now().strftime('%Y-%m-%d %H:%M:%S') # Now
+    
+```
 ##### Filter
+This is crucial to have an efficient filtering function that first separates customers from each other, then separates the shipped from all orders, and now separates the shipped from all.
+```python
+loading_count = 0
+for company in self.customer_coll.find(): # Call customers one by one to filter
+    delivered_items = []
+    for order in self.order_coll.find():
+        if order["Company Name"] == company["_id"]: # Reaching relevant customer's orders
+            counter = 1
+            for order_items in order["Order Details"]:
+                if order['Order Details'][order_items]['Delivered_at'] != "Not Shipped Yet": # Filtering Shipped Orders than other orders
+                    deliver_date = order['Order Details'][order_items]['Delivered_at']
+                    deliver_date_object = datetime.strptime(deliver_date, '%Y-%m-%d %H:%M:%S')
+                    if deliver_date_object >= self.this_date_object:                         # Filtering Shipped Orders which is made today from all shipped orders
+                        cargo_recevier = f"LOADING ID: {counter}\nCARGO: {order['Shipping Info']['Shipper Name']}  RECEIVER: {order['Receiver Info']['Receiver Name']}\n"
+                        delivered_items.append(f"{cargo_recevier}{order['_id']}/{order_items}: {order['Order Details'][order_items]['Item']} {order['Order Details'][order_items]['Color']} {order['Order Details'][order_items]['Meter']} MT") 
+                        counter += 1 
+```
 ##### Recorder
+This application is basically designed to work on its own,that is why it is very important to keep records to ensure that it works correctly or to be aware of errors.
+However, we cannot be completely sure how the errors will occur so it would be more accurate to keep these records both locally and in the cloud. For example, if we only kept logs in the cloud, we would not be aware of errors related to queries.
+```python
+def write_on_records(self, record):
+    print(record)
+    with open("records.txt","r+", encoding="utf-8") as file:
+            content = file.read()
+            content = content + "\n" + f"{str(self.now)}: " + record
+            file.seek(0)
+            file.write(content) 
+
+    self.setting_coll.update_one({"_id":"server_log"},{"$push":{"records" :str(self.now)+ " " + str(record)}}) 
+    self.setting_coll.update_one({"_id":"server_log"},{"$set":{"last_seen":str(self.now)}})
+```
+###### Outputs:
+###### records.txt
+```txt
+2021-12-30 21:32:22: Failed while sending loading report to BAROQUE! Error:send_notification() takes 3 positional arguments but 5 were given.
+2021-12-30 21:32:22: Application is closed.
+2021-12-30 21:36:46: Application is closed.
+2021-12-30 21:37:11: Information of the Loading of 1 item succesfully sent to Company1.
+2021-12-30 21:37:11: Information of the Loading of 1 item succesfully sent to Company 2.
+2021-12-30 21:37:11: Information of the Loading of 1 item succesfully sent to Company 3.
+2021-12-30 21:37:11: Application is closed.
+2021-12-30 21:58:37: Application is activated.
+2021-12-30 21:58:37: Information of the Loading of 1 item succesfully sent to Company 2.
+2021-12-30 21:58:37: Information of the Loading of 1 item succesfully sent to Company 5.
+2021-12-30 21:58:37: Information of the Loading of 1 item succesfully sent to Comapny 6.
+2021-12-30 21:58:37: Application is closed.
+2021-12-31 13:04:56: Application is activated.
+2021-12-31 13:04:56: Application is tested.
+2021-12-31 13:04:56: Application is closed.
+```
+To see the output at the Cloud, click this link [Server Log](#server-log)
+
 ##### Notifier
 In order for it to continue its function stably, we need to be instantly aware of any errors that may occur. Possible error and shutdown events are sent to the technical team with the notification function.
 
