@@ -36,6 +36,7 @@ Navigate Chapters,
   - [Orders](#orders)
   - [Notifications](#notifications)
   - [Server Log](#server-log)
+- [How to Convert a Project to App?](#how-to-convert-a-project-to-app)
 - [How to Contribute?](#how-to-contribute)
 
   
@@ -1974,6 +1975,28 @@ Over time, the data here will grow and the old data will become meaningless. The
                   self.setting_coll.update_one({"_id":"server_log"},{"$pull":{"records" : line}}) 
                   del_rpt += 1
 ```
+## How to Convert a Project to App ?
+If you are using Python Programming Language and have a cool script that you want to convert it to a Desktop Application like this one, you are at the right place! 
+First of all you need to install **pyinstaller** via your **Terminal**.
+```terminal
+pip install pyinstaller
+```
+Now, you need to open the folder where your script is located with all other relevant files. Please be sure that you have the **.ico** file you want it as the icon of the App. After that, in this folder you have to click on **"Shift"** and **"Right Click"** at the same time. You must be able to see a option called **"Open PowerShell from here"**, click on it without waiting no more. I suggest you to write as I shared below.
+
+![terminal_pyinstaller](https://user-images.githubusercontent.com/69144354/150142401-2f2edea1-6d77-47dd-af33-7761974a5450.png)
+
+```
+--  one file -> Create a one-file bundled executable.
+ -  w -> Windowed, no console
+ -  i -> Adding a Icon 
+```
+For more option check the [documentation](https://pyinstaller.readthedocs.io/en/stable/usage.html).
+
+Please consider that **main file** has to be the last one. <br><br>
+Congrulations! You will find your .exe file in a folder named **"dist"**.
+### Possible Errors
+When I converted  my project to app, I recognized that my script was not able to find my .txt and .png files. After I relocate the them to folder which .exe file stays, It solved.<br>
+For more possible errors check the [documentation](https://pyinstaller.readthedocs.io/en/stable/when-things-go-wrong.html)
 ## How to Contribute ? 
 
 I am very praud see you here! Your interest and feedbacks are kind of gift to me. If you are looking for a solution for any of your question which similar to ones shared here, I would be glad to help you.
