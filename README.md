@@ -929,7 +929,7 @@ try:
 except  pymongo.errors.PyMongoError:
     self.warning_messageBox("İnternet bağlantınızı kontrol ediniz!")   
 ```
-#### Start to Prepare a New Order
+##### Start to Prepare a New Order
 ```python
 order_code, item_id = self.get_selected_item_on_table(self.window.ui.table_new_order, 0,4)
 print(f"seçilen order code :{order_code} seçilen id {item_id}")
@@ -937,7 +937,7 @@ self.update_order_status(order_code, item_id, "preparing")
 self.feedback_messageBox(f"{order_code}/{item_id} hazırlanmaya başladı.")
 self.load_data_to_windows()
 ```
-#### Drop a Note to an Order
+##### Drop a Note to an Order
 ```python
 order_code, item_id = self.get_selected_item_on_table(self.window.ui.table_new_order, 0, 4)
 print(f"seçilen order code :{order_code} seçilen id {item_id}")
@@ -954,16 +954,16 @@ try:
 except  pymongo.errors.PyMongoError:
     self.warning_messageBox("İnternet bağlantınızı kontrol ediniz!")
 ```
-#### Take an Order to Wait
+##### Take an Order to Wait
 In case of waiting shows a problem on supplying the item. It might be out of stuck or needed more information from the customer. Therefore, any other departmant than Operation has to take action about this situation. To make this proccess easier, this project offers a simple network solution. It will be better to describe it ordered. 
 
 **After Row Selection and Click on the Button of "Take it to Wait",**
-1.  Program is asking for reason why has it taken to waiting.
+1.  Program is asking for reason why has it taken to waiting via QtDialogWidget .
 2.  Program automatically sends a notification via e-mail to mail adresses assigned as "Supplying Departmant" and "Executive"
 
 For Modelling of the Notification Data, [click on this link](#notifications)
 
-##### Notification Function 
+###### Notification Function 
 ```python
 toList = []
 ccList = []
@@ -983,6 +983,169 @@ body =  line + f"{item_name.text()} {item_color.text()}  {item_meter.text()} MT"
 
 self.send_notification(toList,ccList,subject,body)
 ```
+###### Example Notification E-Mail
+![waiting_order_mail-edit](https://user-images.githubusercontent.com/69144354/150127561-054fb3df-9f68-48c3-961d-bf5e6848e1d7.png)
+
+3.  In the document of relevant product, 3 more field is added,
+    - "Waiting Cause"
+    - "Waiting Info"
+    - "Info_by"
+    - 
+ ###### Function
+ ```python
+cause , ok = QInputDialog.getText(self.window,"Bekleyene Al","Bekleme Sebebi",QLineEdit.Normal)
+if cause and ok is not None:
+    order_code, item_id = self.get_selected_item_on_table(self.window.ui.table_new_order, 0, 4)
+    self.update_order_status(order_code, item_id, "waiting")
+    query = {"_id": order_code}
+    new_value = {"$set": { f"Order Details.{item_id}.Waiting_cause" : cause,
+                            f"Order Details.{item_id}.Waiting_info" : "",
+                            f"Order Details.{item_id}.Info_by" : ""
+    }}
+    self.order_coll.update_one(query, new_value)
+ ```
+ 4. After **Supplying Departmant** or **Executives** takes the necessary actions, they can add info via button named **"Add Info"**  
+ 5. According to info, it is  **Operation Departmant**'s turn to take action accordingly.
+ 
+ ##### Splitting the Order
+ Thanks to Data Modelling of the Products, even items of the order are taken together, program gives a chance to take action item by item. However, sometimes it may be not enough to deliver an order 10 pieces of Product A when there are only 5 so splitting is critical feature for Business Intelligence Software. 
+ 
+ **Note:** Please be aware of that program is designed to give service to a Textile Company. That kind of companies sell fabrics meter by meter which is stocked as rolls. For example, Product A is waiting as roll of 50 Meter. When the amount of the fabric is only 5, that means 5 meters should be cutted from the whole roll.
+ 
+ ###### Getting the Instructions
+ Splitting is important proccess but having the details of the splitted items from user is also as complicated as cutting the piece. <br><br>
+ 
+ Therefore, questions shared below has to be able find an answer. 
+ -  How Many pieces should it split to?
+ -  What are the lenght/amount of the new pieces?
+ -  Is the sum of new pieces equals to their mother?
+ -  Is the input send proper type of data?
+ 
+ ```python
+ try:
+print("split order fonksyionu çalıştı")
+index = self.window.ui.table_preparing.currentRow()
+order_code = self.window.ui.table_preparing.item(index,0).text()
+item_id = self.window.ui.table_preparing.item(index,1).text()
+item_name = self.window.ui.table_preparing.item(index,2).text()
+item_color = self.window.ui.table_preparing.item(index,3).text()
+item_meter = self.window.ui.table_preparing.item(index,4).text()
+
+dialog = self.Dialog(self.window)
+piece_amount , ok = dialog.return_params("Parçala", "Kaç Parçaya Bölünecek")
+if piece_amount and ok is not None:
+    print(f"{piece_amount} parçaya bölünecek")
+    if self.isInt(piece_amount) == True:
+        repeat = 0
+        pieces = []
+        total_meter = 0
+        while repeat < int(piece_amount):
+            line = ""
+            total_line = ""
+            total = 0
+
+            for i in range(len(pieces)):
+                if len(pieces) != 0:
+                    line += f"{i+1}.Parça :{pieces[i]}\n"
+                    total += pieces[i]
+                    total_line = f"Kesilen Parçalar Toplamı:{total} MT"
+
+            piece_meter , ok = dialog.return_params("Parçala",f"{line}\n{total_line}\n\nAna Parça:{item_meter} MT\n\n{repeat+1}.Parça(MT)")
+            if piece_meter and ok is not None:
+                if self.isInt(piece_meter) == True:
+                    pieces.append(int(piece_meter))
+                    repeat += 1
+                    total_meter += int(piece_meter)
+                elif self.isFloat(piece_meter) == True:
+                    pieces.append(float(piece_meter))
+                    repeat += 1
+                    total_meter += float(piece_meter)
+                else:
+                    self.warning_messageBox("Lütfen Sayı Giriniz.")
+            else:
+                dialog.close()
+                break
+        print(total)
+        print(pieces)
+    else:
+        self.warning_messageBox("Lütfen Tam Sayı Giriniz.")
+        print("Lütfen tam sayı giriniz.")
+        dialog.close()
+else:
+    print("kapanıyor")
+    dialog.close()
+except Exception:
+pass
+ ```
+**Note:** Input is coming via a Dialog Object which is assigned as a Class of the child of the App Class.
+ 
+ ###### How to Split
+ Function checks the data type with Exception.
+ ```python
+ try:
+
+    if total_meter != int(item_meter):
+        self.warning_messageBox("Parçaların toplam miktarı Ana toplam ile tutmuyor!\n\nLütfen tekrar deneyiniz.")
+    else:
+
+        # To find Order Note for splitted items
+        filter = {"_id": order_code}
+        order = self.order_coll.find_one(filter)
+        order_note = order["Order Details"][item_id]["Note"]
+        feedback = f"Ana Parça : {order_code}/{item_id} : {item_meter} MT\n\n"
+
+        for i in range(len(pieces)):
+            print(f"Order Code: {order_code} Item Id: {item_id} Item: {item_name} Color: {item_color} Meter {pieces[i]}")
+
+            query = {"_id": order_code}
+            new_value = {"$set": { 
+                                f"Order Details.{item_id + '-' + str(i+1)}.Status" : "preparing",   
+                                f"Order Details.{item_id + '-' + str(i+1)}.Item" : item_name,
+                                f"Order Details.{item_id + '-' + str(i+1)}.Color" : item_color,
+                                f"Order Details.{item_id + '-' + str(i+1)}.Meter" : str(pieces[i]),
+                                f"Order Details.{item_id + '-' + str(i+1)}.Note" : order_note,
+                                f"Order Details.{item_id + '-' + str(i+1)}.Delivered_at" : "Henüz Teslim Edilmedi"
+            }}
+            feedback += f"Parça {i+1} : {str(pieces[i])} MT\n"
+            self.order_coll.update_one(query, new_value)
+
+        self.order_coll.update_one({"_id":order_code},{"$unset":{f"Order Details.{item_id}":""}})  
+        self.feedback_messageBox(feedback + "\nşekilde parçalandı.")
+    self.load_data_to_windows()
+
+except ValueError:
+    if total_meter != float(item_meter):
+         self.warning_messageBox("Parçaların toplamı Ana Parçadan daha fazla!\n\nLütfen tekrar deneyiniz.")
+    else:
+         # To find Order Note for splitted items
+        filter = {"_id": order_code}
+        order = self.order_coll.find_one(filter)
+        order_note = order["Order Details"][item_id]["Note"]
+        feedback = f"Ana Parça : {order_code}/{item_id} : {item_meter} MT\n\n"
+
+        for i in range(len(pieces)):
+            print(f"Order Code: {order_code} Item Id: {item_id} Item: {item_name} Color: {item_color} Meter {pieces[i]}")
+
+            query = {"_id": order_code}
+            new_value = {"$set": { 
+                                f"Order Details.{item_id + '-' + str(i+1)}.Status" : "preparing",   
+                                f"Order Details.{item_id + '-' + str(i+1)}.Item" : item_name,
+                                f"Order Details.{item_id + '-' + str(i+1)}.Color" : item_color,
+                                f"Order Details.{item_id + '-' + str(i+1)}.Meter" : str(pieces[i]),
+                                f"Order Details.{item_id + '-' + str(i+1)}.Note" : order_note,
+                                f"Order Details.{item_id + '-' + str(i+1)}.Delivered_at" : "Henüz Teslim Edilmedi"
+            }}
+            feedback += f"Parça {i+1} : {str(pieces[i])} MT\n"
+            self.order_coll.update_one(query, new_value)
+
+        self.order_coll.update_one({"_id":order_code},{"$unset":{f"Order Details.{item_id}":""}}) 
+        self.feedback_messageBox(feedback + "\nolacak şekilde parçalandı.")
+    self.load_data_to_windows()
+except  pymongo.errors.PyMongoError:
+    self.warning_messageBox("İnternet bağlantınızı kontrol ediniz!")
+except Exception:
+    pass
+ ```
 
 
 ### Report Form
