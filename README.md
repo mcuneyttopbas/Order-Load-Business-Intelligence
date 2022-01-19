@@ -1146,7 +1146,73 @@ except  pymongo.errors.PyMongoError:
 except Exception:
     pass
  ```
+#### Double Click Event on Tables
+All rows on tables are responsive to double click event. For this kind of feature detecting mechanism which is signal-slot connection and a QMessageBox Object is needed. 
+##### Signal - Slot Connection
+These connections are assigned table by table because that message box reaching details from tables. Moreover, tables are designed with different amount of columns.
+```python
+self.window.ui.table_new_order.doubleClicked.connect(self.doubleClick_onNew)
+self.window.ui.table_preparing.doubleClicked.connect(self.doubleClick_onPre)
+self.window.ui.table_waiting.doubleClicked.connect(self.doubleClick_onWait)
+self.window.ui.table_ready.doubleClicked.connect(self.doubleClick_onRdy)
+```
+As an example for all tables,
+```python
+def doubleClick_onWait(self):
+    order_code, item_id = self.get_selected_item_on_table(self.window.ui.table_waiting, 0,1)
+    self.double_click_messageBox(order_code,item_id)
+```
+##### QMessageBox Object Design
+```python
+order = self.order_coll.find_one({"_id":order_code})
+order_status = order["Order Details"][item_id]["Status"]
+order_item = order["Order Details"][item_id]["Item"]
+order_color = order["Order Details"][item_id]["Color"]
+order_meter = order["Order Details"][item_id]["Meter"]
+order_note = order["Order Details"][item_id]["Note"]
+if order_status == "waiting":
+    waiting_cause = order["Order Details"][item_id]["Waiting_cause"]
+    waiting_info = order["Order Details"][item_id]["Waiting_info"]
+    info_by = order["Order Details"][item_id]["Info_by"]
+    line  = f"\nBekleme Sebebi : {waiting_cause}\nBilgi Notu : {waiting_info}\nBilgi Ekleyen : {info_by}\n"
+else:
+    line = ""
+creater = order["Crated_by"]
+order_receiver = order["Receiver Info"]["Receiver Name"]
+order_receiver_authority = order["Receiver Info"]["Authority"]
+order_receiver_gsm = order["Receiver Info"]["Company GSM"]
+order_receiver_adress = order["Receiver Info"]["Company Adress"]
+order_shipper = order["Shipping Info"]["Shipper Name"]
+order_customer_code = order["Shipping Info"]["Customer Code"]
+order_shipping_type = order["Shipping Info"]["Shipping Type"]
+order_shipping_phone = order["Shipping Info"]["Shipper Phone"]
+order_shipping_adress = order["Shipping Info"]["Shipper Adress"]
 
+if order_status == "new":
+    order_status = "Yeni Sipariş"
+elif order_status == "preparing":
+    order_status = "Hazırlanan Sipariş"
+elif order_status == "waiting":
+    order_status = "Bekleyen Sipariş"
+elif order_status == "ready":
+    order_status = "Tamamlanan Sipariş"
+elif order_status == "delivered":
+    order_status = "Sevkedilmiş Sipariş"
+
+
+order_details = f"SİPARİŞ DETAYLARI\n\nSipariş Kodu : {order_code}\nDüzenleyen : {creater}\nSipariş ID : {item_id}\n\nDurum : {order_status}{line}\nÜrün : {order_item}\nRenk : {order_color}\nMetre : {order_meter}\nNot : {order_note}\n\n\n"
+receiver_details = f"ALICI BİLGİLERİ\n\nAdı : {order_receiver}\nYetkili Kişi : {order_receiver_authority}\nGSM : {order_receiver_gsm}\nAdres : {order_receiver_adress}\n\n\n"
+shipper_details = f"TESLİMAT BİLGİLERİ\n\nNakliyeci Adı : {order_shipper}\nMüşteri Kodu : {order_customer_code}\nTaşıma Tipi : {order_shipping_type}\nTel No: : {order_shipping_phone}\nAdres : {order_shipping_adress}\n\n\n"
+
+msg = QMessageBox()
+msg.setWindowTitle("Detay")
+msg.setText(order_details + receiver_details + shipper_details)
+msg.setIcon(QMessageBox.Information)
+msg.setStandardButtons(QMessageBox.Ok)
+msg.setWindowIcon(QtGui.QIcon('icon.png'))
+msg.raise_()
+x = msg.exec_()
+```
 
 ### Report Form
 There are two important feature that creates the Report Form to consider. One of them is Display Settings. Users are able to choose to observe the reports with the details they want to see together. Other feature is can be described as Filtering Orders as they wish. In this section these two features will be discussed with the code behind it. 
