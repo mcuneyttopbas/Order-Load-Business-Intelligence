@@ -1,12 +1,10 @@
 # Order & Load Business Intelligence v1
 
-This document presents the Order & Load BI Software in 4 main chapters under the headings of Introduction, Desktop User Application, Server Application and Data Modeling with
-MongoDB. It aims to enrich the content with Gifs and Screenshots.
+This document presents the Order & Load BI Software in 4 main chapters under the headings of Introduction, Desktop User Application, Server Application and Data Modeling. It aims to enrich the content with Gifs and Screenshots.
 
-In order to make sense of the codes, it is important to have basic knowledge of Python, pymongo and pyqt5.
+In order to make sense of the codes, it is important to have basic knowledge of **Python**, **pymongo** and **pyqt5**.
 
-This project aims to contribute to the fields of user interface, artificial intelligence, data collection, data analysis, data management and digitization of business processes, 
-rather than making commercial gains.
+This project aims to contribute to the fields of **user interface, artificial intelligence, data collection, data analysis, data management and digitization of business processes**, rather than making commercial gains.
 
 **Note** : Instead of saying "it could have been better this way or that way" many times in the document, I would like to state that I did not prepare much for the project in advance,
 it grew on its own as I added new features and I did it to enjoy it. Therefore, in order to see the result,
@@ -14,7 +12,7 @@ I skipped some requirements when you take a look at the codes.
 However, I would like to underline that it has features that can answer the questions of many developers I encountered during my research.
 When I started the project, I was new to the libraries I used, but with my current knowledge, I believe that I can finish this project in half time, which I finished in 3 weeks.
 
-Navigate Chapters,
+Navigate Through Chapters,
 - [Introduction](#introduction)
   - [Functions](#functions)
   - [FAQ](#faq)
@@ -43,7 +41,7 @@ Navigate Chapters,
 ## Introduction
 
 It enables to make processes safer and faster in terms of operation and follow-up until the added orders are shipped.
-Thanks to its easy use, it aims to save time for the departments. In short, it contributes to the transformation of raw data into a meaningful business process.
+Thanks to its easy use, it aims to save time for the departments. In short, it contributes to the transformation of raw data into a meaningful business process. This proccesses designed to serve to a Textile Company. Please consider that products are kept as fabric roll of approximately 50 Meter in stock, then these are cutted according to customers's orders such as only 5 Meter. 
 
 On the **Artificial Intelligence** side of the project, enhanced thinking and data analysis capability was emphasized during the design of the processes. <br>
 **Search Algorithm**, which enables the user to avoid mistakes and take faster action during the product selection phase,<br>
@@ -122,7 +120,7 @@ It would be more appropriate to evaluate the Splash and Login screens together b
 ![splash-login](https://user-images.githubusercontent.com/69144354/149879188-f9296f40-b7d1-43ca-be83-8ed56147ce7f.gif)
 
 #### Splash 
-The Splash Screen has been added to the program symbolically. It is aimed to give an idea about how creative work can be done on the frontend with the PyQt library.
+The Splash Screen has been added to the program symbolically. It is aimed to give an idea about how creative work can be done on the frontend with the **PyQt5** library.
 ##### Progress Bar Animation
 ```python
 class  SplashScreen(QtWidgets.QMainWindow):
@@ -777,8 +775,8 @@ Main Window is the part of the Project which is more relevant with Operation Tea
 #### Data Transfer Algorithm
 Algorithm based on reading an Order's status from the Database. Thanks to this architecture data is transferred from MongoDB Cloud Service all the time. That means data is not staying in the table.
 ##### Stracture of the Order "Status"
-An Order which is created by Order Form takes it's status as **"new"** at first when [add_order](#order-form) function is called.  Therefore, after a row selected, clicking on the **"Prepare"** button only change the status of the order. For waiting, ready and shipped order, same structure is used.
-To check a **product data modelling** kept in the Database out, [click on this link](#products).
+An Order which is created by Order Form takes it's status as **"new"** at first when [add_order](#order-form) function is called.  Therefore, after a row selected, clicking on the **"Prepare"** button only change the status of the order. For waiting, ready and shipped order, same structure is used. <br>
+To examine the **"status"** values **order data modelling** kept in the Database, [click on this link](#orders).
 
 ##### Load Data to QTableWidget Objects
 Algortihm is based on locate the order according to it's **status**. All action updates tables because tables are cleaned and data is loaded again after any action. Shipped Orders can be seen only via Report Form.
@@ -991,7 +989,7 @@ self.send_notification(toList,ccList,subject,body)
     - "Waiting Cause"
     - "Waiting Info"
     - "Info_by"
-    - 
+  
  ###### Function
  ```python
 cause , ok = QInputDialog.getText(self.window,"Bekleyene Al","Bekleme Sebebi",QLineEdit.Normal)
@@ -1015,7 +1013,6 @@ if cause and ok is not None:
  
  ###### Getting the Instructions
  Splitting is important proccess but having the details of the splitted items from user is also as complicated as cutting the piece. <br><br>
- 
  Therefore, questions shared below has to be able find an answer. 
  -  How Many pieces should it split to?
  -  What are the lenght/amount of the new pieces?
