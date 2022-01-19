@@ -774,6 +774,7 @@ Main Window is the part of the Project which is more relevant with Operation Tea
 ![main](https://user-images.githubusercontent.com/69144354/149923111-59dbb7b8-d875-4268-8980-a02a9b109007.gif)
 
 #### Data Transfer Algorithm
+Algorithm based on reading an Order's status from the Database. Thanks to this architecture data is transferred from MongoDB Cloud Service all the time. That means data is not staying in the table.
 ##### Stracture of the Order "Status"
 An Order which is created by Order Form takes it's status as **"new"** at first when [add_order](#order-form) function is called.  Therefore, after a row selected, clicking on the **"Prepare"** button only change the status of the order. For waiting, ready and shipped order, same structure is used.
 To check a **product data modelling** kept in the Database out, [click on this link](#products).
@@ -781,10 +782,10 @@ To check a **product data modelling** kept in the Database out, [click on this l
 ##### Load Data to QTableWidget Objects
 Algortihm is based on locate the order according to it's **status**. All action updates tables because tables are cleaned and data is loaded again after any action. Shipped Orders can be seen only via Report Form.
 
-##### Styles of Tables
-###### Setting Columns
+###### Styles of Tables
+Setting Columns :
 ```python
-############## "NEW" TABLE COLUMN SETTINGS ############################
+# New Orders
 self.window.ui.table_new_order.setColumnCount(9)      
 self.window.ui.table_new_order.setHorizontalHeaderLabels(("Sipariş Kodu","Firma","Kargo","Alıcı","ID","Ürün","Ürün Kodu","Metre","Not"))
 self.window.ui.table_new_order.setColumnWidth(0,150)
@@ -797,7 +798,7 @@ self.window.ui.table_new_order.setColumnWidth(6,100)
 self.window.ui.table_new_order.setColumnWidth(7,50)
 self.window.ui.table_new_order.setColumnWidth(8,175)
 
-############# "PREPARING" ORDERS TABLE COLUMN SETTINGS #######################
+# Preparing Orders
 self.window.ui.table_preparing.setColumnCount(5)      
 self.window.ui.table_preparing.setHorizontalHeaderLabels(("Sipariş Kodu","ID","Ürün","Ürün Kodu","Metre"))
 self.window.ui.table_preparing.setColumnWidth(0,75)
@@ -806,7 +807,7 @@ self.window.ui.table_preparing.setColumnWidth(2,100)
 self.window.ui.table_preparing.setColumnWidth(3,100)
 self.window.ui.table_preparing.setColumnWidth(4,10)
 
-############# "WAITING" ORDERS TABLE COLUMN SETTINGS ##########################
+# Waiting Orders
 self.window.ui.table_waiting.setColumnCount(5)      
 self.window.ui.table_waiting.setHorizontalHeaderLabels(("Sipariş Kodu","ID","Ürün","Ürün Kodu","Metre"))
 self.window.ui.table_waiting.setColumnWidth(0,75)
@@ -815,7 +816,7 @@ self.window.ui.table_waiting.setColumnWidth(2,100)
 self.window.ui.table_waiting.setColumnWidth(3,100)
 self.window.ui.table_waiting.setColumnWidth(4,10)
 
-############# "READY" ORDERS TABLE COLUMN SETTINGS ############################
+# Ready Orders
 self.window.ui.table_ready.setColumnCount(9)      
 self.window.ui.table_ready.setHorizontalHeaderLabels(("Sipariş Kodu","Firma","Kargo","Alıcı","ID","Ürün","Ürün Kodu","Metre","Not"))
 self.window.ui.table_ready.setColumnWidth(0,150)
@@ -828,7 +829,7 @@ self.window.ui.table_ready.setColumnWidth(6,100)
 self.window.ui.table_ready.setColumnWidth(7,100)
 self.window.ui.table_ready.setColumnWidth(8,175)
 ```
-###### Setting Rows
+Setting Rows  :
 ```python
 newOrder_rowCount = 0
 preparingOrder_rowCount = 0
@@ -854,7 +855,134 @@ self.window.ui.table_preparing.setRowCount(preparingOrder_rowCount)
 self.window.ui.table_waiting.setRowCount(waitingOrder_rowCount)
 self.window.ui.table_ready.setRowCount(readyOrder_rowCount)
 ```
+###### Filtration 
+```python
+newOrder_rowIndex = 0
+preparingOrder_rowIndex = 0
+waitingOrder_rowIndex = 0
+readyOrder_rowIndex = 0
 
+for order in self.order_coll.find():
+    for order_items in order["Order Details"]:
+        if order['Order Details'][order_items]['Status'] == "new":
+            self.window.ui.table_new_order.setItem(newOrder_rowIndex,0,QTableWidgetItem(order['_id']))
+            self.window.ui.table_new_order.setItem(newOrder_rowIndex,1,QTableWidgetItem(order['Company Name']))
+            self.window.ui.table_new_order.setItem(newOrder_rowIndex,2,QTableWidgetItem(order["Shipping Info"]["Shipper Name"]))
+            self.window.ui.table_new_order.setItem(newOrder_rowIndex,3,QTableWidgetItem(order["Receiver Info"]["Receiver Name"]))
+            self.window.ui.table_new_order.setItem(newOrder_rowIndex,4,QTableWidgetItem(order_items))
+            self.window.ui.table_new_order.setItem(newOrder_rowIndex,5,QTableWidgetItem(order['Order Details'][order_items]['Item']))
+            self.window.ui.table_new_order.setItem(newOrder_rowIndex,6,QTableWidgetItem(order['Order Details'][order_items]['Color']))
+            self.window.ui.table_new_order.setItem(newOrder_rowIndex,7,QTableWidgetItem(order['Order Details'][order_items]['Meter']))
+            self.window.ui.table_new_order.setItem(newOrder_rowIndex,8,QTableWidgetItem(order['Order Details'][order_items]['Note']))
+            newOrder_rowIndex += 1
+
+        elif order['Order Details'][order_items]['Status'] == "preparing":
+            self.window.ui.table_preparing.setItem(preparingOrder_rowIndex,0,QTableWidgetItem(order['_id']))
+            self.window.ui.table_preparing.setItem(preparingOrder_rowIndex,1,QTableWidgetItem(order_items))
+            self.window.ui.table_preparing.setItem(preparingOrder_rowIndex,2,QTableWidgetItem(order['Order Details'][order_items]['Item']))
+            self.window.ui.table_preparing.setItem(preparingOrder_rowIndex,3,QTableWidgetItem(order['Order Details'][order_items]['Color']))
+            self.window.ui.table_preparing.setItem(preparingOrder_rowIndex,4,QTableWidgetItem(order['Order Details'][order_items]['Meter']))
+            preparingOrder_rowIndex += 1
+
+        elif order['Order Details'][order_items]['Status'] == "waiting":
+            self.window.ui.table_waiting.setItem(waitingOrder_rowIndex,0,QTableWidgetItem(order['_id']))
+            self.window.ui.table_waiting.setItem(waitingOrder_rowIndex,1,QTableWidgetItem(order_items))
+            self.window.ui.table_waiting.setItem(waitingOrder_rowIndex,2,QTableWidgetItem(order['Order Details'][order_items]['Item']))
+            self.window.ui.table_waiting.setItem(waitingOrder_rowIndex,3,QTableWidgetItem(order['Order Details'][order_items]['Color']))
+            self.window.ui.table_waiting.setItem(waitingOrder_rowIndex,4,QTableWidgetItem(order['Order Details'][order_items]['Meter']))
+            waitingOrder_rowIndex += 1
+
+        elif order['Order Details'][order_items]['Status'] == "ready":
+            self.window.ui.table_ready.setItem(readyOrder_rowIndex,0,QTableWidgetItem(order['_id']))
+            self.window.ui.table_ready.setItem(readyOrder_rowIndex,1,QTableWidgetItem(order['Company Name']))
+            self.window.ui.table_ready.setItem(readyOrder_rowIndex,2,QTableWidgetItem(order["Shipping Info"]["Shipper Name"]))
+            self.window.ui.table_ready.setItem(readyOrder_rowIndex,3,QTableWidgetItem(order["Receiver Info"]["Receiver Name"]))
+            self.window.ui.table_ready.setItem(readyOrder_rowIndex,4,QTableWidgetItem(order_items))
+            self.window.ui.table_ready.setItem(readyOrder_rowIndex,5,QTableWidgetItem(order['Order Details'][order_items]['Item']))
+            self.window.ui.table_ready.setItem(readyOrder_rowIndex,6,QTableWidgetItem(order['Order Details'][order_items]['Color']))
+            self.window.ui.table_ready.setItem(readyOrder_rowIndex,7,QTableWidgetItem(order['Order Details'][order_items]['Meter']))
+            self.window.ui.table_ready.setItem(readyOrder_rowIndex,8,QTableWidgetItem(order['Order Details'][order_items]['Note']))
+            readyOrder_rowIndex += 1
+
+self.window.ui.txt_lastUpdate.setText(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+```
+#### Functions of QPushButton Objects
+As it mentioned,a row has to be selected before action and Algorithm is based on changing the status of an order. Therefore, there are two common proccess implementing everytime a button is clicked. These are shared below.
+##### Get Selected Item On Tables
+```python
+index = tableWidget.currentRow()
+order_code = tableWidget.item(index,orderCode_col_index)
+item_id = tableWidget.item(index,id_col_index)
+
+if order_code is not None and item_id is not None:
+    return order_code.text(), item_id.text()
+else:
+    print("not selected properly")
+```
+##### Update Order Status
+```python
+try:
+    query = {"_id": order_code}
+    new_value = {"$set": { f"Order Details.{item_id}.Status" : status}}
+
+    self.order_coll.update_one(query, new_value)
+except  pymongo.errors.PyMongoError:
+    self.warning_messageBox("İnternet bağlantınızı kontrol ediniz!")   
+```
+#### Start to Prepare a New Order
+```python
+order_code, item_id = self.get_selected_item_on_table(self.window.ui.table_new_order, 0,4)
+print(f"seçilen order code :{order_code} seçilen id {item_id}")
+self.update_order_status(order_code, item_id, "preparing")
+self.feedback_messageBox(f"{order_code}/{item_id} hazırlanmaya başladı.")
+self.load_data_to_windows()
+```
+#### Drop a Note to an Order
+```python
+order_code, item_id = self.get_selected_item_on_table(self.window.ui.table_new_order, 0, 4)
+print(f"seçilen order code :{order_code} seçilen id {item_id}")
+try:       
+    note , ok = QInputDialog.getText(self.window,"Not Ekle","Not",QLineEdit.Normal)
+    if note and ok is not None:
+        query = {"_id": order_code}
+        new_value = {"$set": { f"Order Details.{item_id}.Note" : note}}
+        self.order_coll.update_one(query, new_value)
+
+        self.feedback_messageBox(f"{order_code}/{item_id} not eklendi.\n\nNot: {note}")
+    self.load_data_to_windows()
+
+except  pymongo.errors.PyMongoError:
+    self.warning_messageBox("İnternet bağlantınızı kontrol ediniz!")
+```
+#### Take an Order to Wait
+In case of waiting shows a problem on supplying the item. It might be out of stuck or needed more information from the customer. Therefore, any other departmant than Operation has to take action about this situation. To make this proccess easier, this project offers a simple network solution. It will be better to describe it ordered. 
+
+**After Row Selection and Click on the Button of "Take it to Wait",**
+1.  Program is asking for reason why has it taken to waiting.
+2.  Program automatically sends a notification via e-mail to mail adresses assigned as "Supplying Departmant" and "Executive"
+
+For Modelling of the Notification Data, [click on this link](#notifications)
+
+##### Notification Function 
+```python
+toList = []
+ccList = []
+
+settings = self.setting_coll.find_one({"_id":"notifications"})
+for setting in settings:
+    if setting == "supplying_departmant":
+        for adress in settings[setting]:
+            toList.append(adress["mail"])
+    elif setting == "executive":
+        for adress in settings[setting]:
+            toList.append(adress["mail"])
+
+subject = f"{order_code} / {item_id} BEKLEYENE ALINDI"
+line = f"Aşağıda belirtilen ürün beklemeye alındı,\n\n{cause.capitalize()}.\n\n"
+body =  line + f"{item_name.text()} {item_color.text()}  {item_meter.text()} MT"
+
+self.send_notification(toList,ccList,subject,body)
+```
 
 
 ### Report Form
@@ -907,7 +1035,7 @@ self.ui.btnGroup_display.buttonToggled[QtWidgets.QAbstractButton, bool].connect(
 ```
 That connection helps to  syncronize  the display detail choices.
 ###### Filter Datas
-Holding Datas of Selected Filteration Setting (Company Name, Order Status:New,Preparing etc.) :
+Holding Datas of Selected Filtration Setting (Company Name, Order Status:New,Preparing etc.) :
 ```python
 self.selected_filter_items = []
           for button in self.ui.btnGroup_orderDetails.buttons():
@@ -928,11 +1056,11 @@ self.selected_filter_items = []
                           rowCount += 1 
           self.ui.table_statics.setRowCount(rowCount)
 ```
-For any changing at Filteration Settings, Signal-Slot Connection  :
+For any changing at Filtration Settings, Signal-Slot Connection  :
 ```python
 self.ui.btnGroup_orderDetails.buttonToggled[QtWidgets.QAbstractButton, bool].connect(self.display_table)
 ```
-That connection helps to  syncronize  the filteration detail choices.
+That connection helps to  syncronize  the filtration detail choices.
 
 #### Data Transferring to the Table
 As rows and columns are set, managing function of the data while observing is shared below.
