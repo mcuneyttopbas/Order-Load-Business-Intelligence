@@ -1974,3 +1974,20 @@ Over time, the data here will grow and the old data will become meaningless. The
                   self.setting_coll.update_one({"_id":"server_log"},{"$pull":{"records" : line}}) 
                   del_rpt += 1
 ```
+## How to Contribute ? 
+
+I am very praud see you here! Your interest and feedbacks are kind of gift to me. If you are looking for a solution for any of your question which similar to ones shared here, I would be glad to help you.
+
+### Develop As You Wish 
+
+I would like to update this project with your new features and improvement. Do not hesitate to send me.
+
+### Challenge Yourself
+
+There are several errorr which is hidden through codes. I will share with you the ones which are discovered while using by a company. 
+
+- [x] When it takes a order to waiting table throws an error
+- [x] Server Application do not send the daily loading reports.
+- [ ] After change an item from Cargo Combo box receiver line edits are updated as well.
+- [ ] If "F1" pressed at Variant Code Cell which is in the Order Form, program throws an error.
+- [ ] Sometimes in case of disconnection of the internet, program throws an error.
