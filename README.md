@@ -775,7 +775,7 @@ Main Window is the part of the Project which is more relevant with Operation Tea
 #### Data Transfer Algorithm
 Algorithm based on reading an Order's status from the Database. Thanks to this architecture data is transferred from MongoDB Cloud Service all the time. That means data is not staying in the table.
 ##### Stracture of the Order "Status"
-An Order which is created by Order Form takes it's status as **"new"** at first when [add_order](#order-form) function is called.  Therefore, after a row selected, clicking on the **"Prepare"** button only change the status of the order. For waiting, ready and shipped order, same structure is used. <br>
+An Order which is created by Order Form takes it's status as **"new"** at first when [add_order](#order-form) function is called.  Therefore, after a row selected, clicking on the **"Prepare"** button only change the status of the order. For waiting, ready and shipped order, same structure is used. <br><br>
 To examine the **"status"** values **order data modelling** kept in the Database, [click on this link](#orders).
 
 ##### Load Data to QTableWidget Objects
