@@ -8,7 +8,7 @@ In order to make sense of the codes, it is important to have basic knowledge of 
 This project aims to contribute to the fields of user interface, artificial intelligence, data collection, data analysis, data management and digitization of business processes, 
 rather than making commercial gains.
 
-**Note** : Instead of saying "it could have been better this way or that" many times in the document, I would like to state that I did not prepare much for the project in advance,
+**Note** : Instead of saying "it could have been better this way or that way" many times in the document, I would like to state that I did not prepare much for the project in advance,
 it grew on its own as I added new features and I did it to enjoy it. Therefore, in order to see the result,
 I skipped some requirements when you take a look at the codes.
 However, I would like to underline that it has features that can answer the questions of many developers I encountered during my research.
@@ -769,7 +769,93 @@ def create_orderCode(self,company):
 
 
 ### Main Window 
+Main Window is the part of the Project which is more relevant with Operation Teams in Companies. There are 4 QTable Widget Object to follow and manage orders. These tables contain New, Preparing, Waiting(Holding) and Ready orders. Before taking any action, relevant row has to be selected. Then buttons which are located besides tables will be able to start proccesses. This design based on usage of cursor. 
+
 ![main](https://user-images.githubusercontent.com/69144354/149923111-59dbb7b8-d875-4268-8980-a02a9b109007.gif)
+
+#### Data Transfer Algorithm
+##### Stracture of the Order "Status"
+An Order which is created by Order Form takes it's status as **"new"** at first when [add_order](#order-form) function is called.  Therefore, after a row selected, clicking on the **"Prepare"** button only change the status of the order. For waiting, ready and shipped order, same structure is used.
+To check a **product data modelling** kept in the Database out, [click on this link](#products).
+
+##### Load Data to QTableWidget Objects
+Algortihm is based on locate the order according to it's **status**. All action updates tables because tables are cleaned and data is loaded again after any action. Shipped Orders can be seen only via Report Form.
+
+##### Styles of Tables
+###### Setting Columns
+```python
+############## "NEW" TABLE COLUMN SETTINGS ############################
+self.window.ui.table_new_order.setColumnCount(9)      
+self.window.ui.table_new_order.setHorizontalHeaderLabels(("Sipariş Kodu","Firma","Kargo","Alıcı","ID","Ürün","Ürün Kodu","Metre","Not"))
+self.window.ui.table_new_order.setColumnWidth(0,150)
+self.window.ui.table_new_order.setColumnWidth(1,100)
+self.window.ui.table_new_order.setColumnWidth(2,125)
+self.window.ui.table_new_order.setColumnWidth(3,100)
+self.window.ui.table_new_order.setColumnWidth(4,50)
+self.window.ui.table_new_order.setColumnWidth(5,100)
+self.window.ui.table_new_order.setColumnWidth(6,100)
+self.window.ui.table_new_order.setColumnWidth(7,50)
+self.window.ui.table_new_order.setColumnWidth(8,175)
+
+############# "PREPARING" ORDERS TABLE COLUMN SETTINGS #######################
+self.window.ui.table_preparing.setColumnCount(5)      
+self.window.ui.table_preparing.setHorizontalHeaderLabels(("Sipariş Kodu","ID","Ürün","Ürün Kodu","Metre"))
+self.window.ui.table_preparing.setColumnWidth(0,75)
+self.window.ui.table_preparing.setColumnWidth(1,10)
+self.window.ui.table_preparing.setColumnWidth(2,100)
+self.window.ui.table_preparing.setColumnWidth(3,100)
+self.window.ui.table_preparing.setColumnWidth(4,10)
+
+############# "WAITING" ORDERS TABLE COLUMN SETTINGS ##########################
+self.window.ui.table_waiting.setColumnCount(5)      
+self.window.ui.table_waiting.setHorizontalHeaderLabels(("Sipariş Kodu","ID","Ürün","Ürün Kodu","Metre"))
+self.window.ui.table_waiting.setColumnWidth(0,75)
+self.window.ui.table_waiting.setColumnWidth(1,10)
+self.window.ui.table_waiting.setColumnWidth(2,100)
+self.window.ui.table_waiting.setColumnWidth(3,100)
+self.window.ui.table_waiting.setColumnWidth(4,10)
+
+############# "READY" ORDERS TABLE COLUMN SETTINGS ############################
+self.window.ui.table_ready.setColumnCount(9)      
+self.window.ui.table_ready.setHorizontalHeaderLabels(("Sipariş Kodu","Firma","Kargo","Alıcı","ID","Ürün","Ürün Kodu","Metre","Not"))
+self.window.ui.table_ready.setColumnWidth(0,150)
+self.window.ui.table_ready.setColumnWidth(1,100)
+self.window.ui.table_ready.setColumnWidth(2,125)
+self.window.ui.table_ready.setColumnWidth(3,100)
+self.window.ui.table_ready.setColumnWidth(4,50)
+self.window.ui.table_ready.setColumnWidth(5,75)
+self.window.ui.table_ready.setColumnWidth(6,100)
+self.window.ui.table_ready.setColumnWidth(7,100)
+self.window.ui.table_ready.setColumnWidth(8,175)
+```
+###### Setting Rows
+```python
+newOrder_rowCount = 0
+preparingOrder_rowCount = 0
+waitingOrder_rowCount = 0
+readyOrder_rowCount = 0
+shippedOrder_rowCount = 0
+
+for order in self.order_coll.find():
+    for order_items in order["Order Details"]:
+        if order['Order Details'][order_items]['Status'] == "new":
+            newOrder_rowCount += 1
+        elif order['Order Details'][order_items]['Status'] == "preparing":
+            preparingOrder_rowCount += 1
+        elif order['Order Details'][order_items]['Status'] == "waiting":
+            waitingOrder_rowCount += 1
+        elif order['Order Details'][order_items]['Status'] == "ready":
+            readyOrder_rowCount += 1
+        elif order['Order Details'][order_items]['Status'] == "shipped":
+            shippedOrder_rowCount += 1
+
+self.window.ui.table_new_order.setRowCount(newOrder_rowCount)
+self.window.ui.table_preparing.setRowCount(preparingOrder_rowCount)
+self.window.ui.table_waiting.setRowCount(waitingOrder_rowCount)
+self.window.ui.table_ready.setRowCount(readyOrder_rowCount)
+```
+
+
 
 ### Report Form
 There are two important feature that creates the Report Form to consider. One of them is Display Settings. Users are able to choose to observe the reports with the details they want to see together. Other feature is can be described as Filtering Orders as they wish. In this section these two features will be discussed with the code behind it. 
