@@ -36,8 +36,8 @@ Navigate Chapters,
   - [Orders](#orders)
   - [Notifications](#notifications)
   - [Server Log](#server-log)
-- [How to Convert a Project to App?](#how-to-convert-a-project-to-app?)
-- [How to Contribute?](#how-to-contribute?)
+- [How to Convert a Project to App-](#how-to-convert-a-project-to-app?)
+- [How to Contribute-](#how-to-contribute?)
 
   
 ## Introduction
