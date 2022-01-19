@@ -1993,10 +1993,10 @@ Please consider that **main file** has to be the last one. <br><br>
 Congrulations! You will find your .exe file in a folder named **"dist"**.
 ### Possible Errors
 When I converted  my project to app, I recognized that my script was not able to find my .txt and .png files. After I relocate the them to folder which .exe file stays, It solved.<br><br>
-For more possible errors check the [documentation](https://pyinstaller.readthedocs.io/en/stable/when-things-go-wrong.html)
+For more possible errors check the [documentation](https://pyinstaller.readthedocs.io/en/stable/when-things-go-wrong.html).
 ## How to Contribute ? 
 
-I am very praud see you here! Your interest and feedbacks are kind of gift to me. If you are looking for a solution for any of your question which similar to ones shared here, I would be glad to help you.
+I am very praud to see you here! Your interest and feedbacks are kind of gift to me. If you are looking for a solution for any of your question which similar to ones shared here, I would be glad to help you.
 
 ### Develop As You Wish 
 
