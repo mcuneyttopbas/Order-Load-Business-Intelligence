@@ -1,0 +1,108 @@
+Order & Load Akıllı İş Zekası Yazılımı, 
+
+Bu döküman Order & Load programını Giriş, Masaüstü Kullanıcı Kullanıcı Uygulaması, Server Uygulaması ve MongoDB ile Veri Modelleme başlıkları altında 3 Ana Bölüm halinde sunar. Gif ve Ekran Görüntüleri ile
+içeriği zenginleştirmeyi hedefler.
+
+Kodları anlamlandırabilmek adına temelde düzeyde Phython, pymongo ve pyqt5 bilgisine sahip olmak önem arz etmektedir.
+
+Bu proje ticari kazanımlar elde etmekten ziyade kullanıcı arayüzü, yapay zeka, veri toplama, veriyi analiz etme, veriyi yönetmek(uygulamak) ve iş süreçlerinin dijitalleştirilmesi
+alanlarına katkı sunmayı hedeflemektedir.
+
+Önemli  :   Dökümanda birçok sefer "bu veya şu şekilde daha iyi olabilirdi" demek yerine ilgili proje üzerine önceden çok hazırlık yapmadığımı, yeni özellikler ekledikçe kendi kendine büyüdüğünü ve
+bundan zevk almak için yaptığımı belirtmek isterim. Dolayısı ile neticeyi görmek adına bazı gereklilikleri es geçtiğimi kodlara göz atınca görebilirsiniz. Yinede araştırmalarım esnasında 
+karşılaştığım bir çok geliştiricinin sorularına cevap verecek nitelikte özelliklerinde bulunduğunun altını çizerim. Projeye başladığımda kullandığım kütüphanelere daha çok yeniydim, ancak 
+bugün ki bilgi birikimimle 3 hafta da bitirdiğim bu projeyi yarı zamanda bitirebileceğime inanıyorum.  
+
+GİRİŞ
+
+Eklenen siparişlerin sevkedilmesine kadar operasyon ve takip açısından süreçleri daha güvenli ve hızlı hale getirmeyi sağlar. 
+Kolay kullanımı sayesinde departmanlara zaman kazandırmayı hedefler. Kısaca, ham verinin anlamlı bir iş sürecine dönüşmesine katkı sunar.
+
+Projenin yapay zeka tarafında güçlendirilmiş düşünce ve veri analizi yeteneği üzerine süreçlerin dizaynı sırasında durulmuştur. 
+Kullanıcın sipariş ekleme aşamasında hatadan kaçınmasını ve daha hızlı işlem yapabilmesini sağlayan Arama Algoritması,
+Kullanıcıdan alınan girişlerin Integer veya Float veri tipinde olup olmadığını kontrol eden Kök Bulma Algoritmaları,
+Raporlara gözatarken filtreleme ve görüntüleme ayarlarının dinamik bir şekilde kullanımını sunan Sıralama Algoritması,
+Takip'in çok önem arz ettiği aşamalarda ilgili kimselere olaydan olaya değişen formatlarda yalnızca alakalı verileri mail olarak sunan Genetik Algoritmaları,
+Server tarafında yalnızca belirli zamanlarda ve şartlarda çalışan fonksiyonlar bu programın yapay zekadan ciddi anlamda yararlandığını göstermektedir.
+
+Kullanıcı arayüzü tarafında basitlik prensipi ile haraket edilmiş olup tüm işlemlerin mümkün olduğunca klavye ile de yapılabilmesi hedeflenmiştir. Pencerelerin sınıfları Ana dosyaya(main.py) import
+edilmiş olup, App sınıfı içerisinde nesne türetilmiştir. Bir arada gözlemlenebilmesi için closeEvent fonksiyonları dışında ki tüm fonksiyonları ana dosyada tanımlanmıştır. Yalnızca splash ve 
+report sınıflarının fonksiyonları import edildiği kaynak dosyasında tanımlanmıştır. Bu yapı kasıtlı olarak olulturulmamıştır ancak geliştiricilere iki farklı yöntemi tecrübe etme şansını sunmuştur.
+Estetik kaygılar göz önünde bulundurulmamıştır.
+
+Bunun gibi uygulamalarda en önemli noktalardan biri Veri Modelinin doğru dizayn edilmesidir. Bu konuda başarılı olan uygulamaların kullanıcı arayüzü ve backend tarafında daha pratik çözümler 
+üretebilmesi muhtemeldir. Sonuç olarak verinin başarılı bir şekilde analiz edilmesi ve yönetilebilmesi için daha hızlı ve hataya daha az açık sorgular yapılabilecek ortamların hazırlanması gerekir.
+
+İnternet kesintileri dışında çoğu olası hata durumu kontrol altına alınmıştır. Her halükarda sorgu aşamasında herhangi bir aksilik olmaz ise veride bozulma yaşanması gerçekleşmeyecektir.
+
+Aşağıda programın işlevleri kısaca özetlenmiştir.
+
+İŞLEVLERİ
+Müşteri ve Kargo Bilgileri Ekleme, Düzenleme ve Silme.
+Sipariş Kodunun Otomatik olarak atanması ve sıralanması
+Sipariş Ekleme
+Eklenen siparişin detaylarının ilgili müşteri ve operasyon ekibine mail formatında otomatik olarak iletilmesi.
+İyi dizayn edilmiş MongoDB Veritabanı Modeli sayesinde Siparişin toplu girilmesine rağmen ürün bazında takibi ve yönetiminin sağlaması. 
+Tüm Siparişlerin Ana Ekrandan anlık Takibi
+Siparişlere sonradan not eklenebilmesi
+Sipariş Parçalama
+Siparişlerin Yönetilmesi(İptal Etme, Hazırlama, Bekletme, Tamamlama ve Sevketme)
+Sipariş'in tedarik edilememesi durumunda bekleyene alınan siparişe bekleme sebebi eklenmesi
+Bekleyene alınan siparişin bekleme sebebi ile birlikte tedarik birimine mail formatında otomatik olarak iletilmesi.
+Bekleyen Sipariş'e ne zaman veya nasıl tedarik edileceği ile ilgili bilgi notu eklenmesini
+Siparişler detaylarını detaylı raporlama
+Sipariş raporlarında kişiselleştirilmiş ayarlar (Filtreleme, Görüntü Ayarları)
+Sipariş raporlarının excel formatında dışarı aktarılması 
+Server Uygulamasının gün içinde yapılan yüklemeleri ilgili yükleme raporu müşterilere gün sonunda mail formatında otomatik olarak iletilmesi
+Server Uygulamasında meydana gelecek kapanma veya hata durumlarını teknik birime anlık olarak mail formatında otomatik olarak iletilmesi
+
+Aşağıda geliştiricilerin sık sorduğu ve projede cevabını bulabileceği bazı sorular yer almaktadır,
+
+PyQt5 sORULARI
+PyQt5 ile çok pencereli bir uygulama nasıl yapılır?
+PyQt5 ile çok pencereli bir uygulama geliştirilirken ne tür hataların önlenmesi gerekir?
+PyQt5 'de signal-slot atamaları nasıl yapılır?
+Veriler dinamik olarak QTableWidget'a nasıl aktarılır?
+Widgetlarda kapanma olayı nasıl eklenir?
+Pencerelerde QShorcut ile kısayol nesnesi nasıl oluşturulur?
+QTableWidget üzerinde seçili satırdaki bilgilere nasıl ulaşabilirim?
+QTableWidget'da son satıra gelince yeni satır eklenmesini nasıl sağlayabilirim?
+
+MongoDB Soruları
+MongoDB üzerinden kullanıcı adı, parola kontrolü nasıl sağlanmalıdır?
+İç içe geçmiş sözlük veri tipinde ki alanlara ulaşmak, filtrelemek ve sıralamak nasıl yapılır?
+İç içe geçmiş sözlük veri tipinde ki alanlara nasıl yeni değerler eklenir, güncellenir ve silinir?
+Dizilere nasıl yeni anahtarlar ve değerler eklenir?
+Diziler nasıl güncellenebilir?
+Farklı koleksiyonlardaki dökümanlar nasıl ilişkilendirilir?
+
+Diğer
+Python ile mail nasıl gönderilir?
+Python ile klavye tuşları nasıl kontrol edilir?
+Json dosyası ile ayarlar yerelde nasıl yönetilir?
+Pandas kütüphanesi ile dosya okunması ve verilerin uygulanması nasıl yapılır?
+Openpyexcel kütüphanesi ile verilerin senkronize edilmesi ve excel dosyasına aktarılması nasıl gerçekleştirilir?
+
+
+
+MASAÜSTÜ KULLANICI UYGULAMASI
+    -   MULTI WINDOW APP
+    -   SPLASH & LOGIN 
+    -   MAIN WINDOW
+    -   ORDER FORM
+        -   SEARCHING FORM
+    -   REPORT FORM 
+    -   SETTINGS
+    -   CLOSE EVENTS
+
+SERVER UYGULAMASI
+    -   SERVER APP
+
+DATA MODELLING
+    Projede NoSQL bir Veritabanı olan MongoDB tercih edilmiştir. MongoDB bu özelliği ile ilişkisel olmayan, içerisinde dökümanlar bulunan veri koleksiyonları oluşturmanızı sağlar. 
+    Tabi ki birbiri ile ilişkilendirilmesi gereken veriler her zaman olacaktır ancak bu ilişkilendirmeyi sorguların gönderildiği tarafta tamamlamak geliştiricilere önemli bir esneklik
+    sağlamaktadır.  İhtiyaç duyduğunuz zaman dökümanlarınıza anahtar-değer ilişkileri bulunan sözlük tipinde veriler,
+    diziler veya sözlük tipinde verilerden oluşna diziler ekleyebilirsiniz. Aynı zamanda bu yapı ile yenilikleri çok daha hızlı gerçekleştirebilirsiniz çünkü yeni eklediğiniz alanları koleksiyonda bulunan tüm dökümanlara eklemek gibi bir zorunluluğunuz yoktur.
+        *Veritabanı Tablolarondan bahsedilir (Tablo Şeklinde eklenebilir)
+        **Veritabanı şemaları gösterilir
+        ***İlişkilendirmekten bahsedilir

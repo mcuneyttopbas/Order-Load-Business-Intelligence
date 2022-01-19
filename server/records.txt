@@ -1,0 +1,96 @@
+2021-12-30 21:05:55: Application is closed.
+2021-12-30 21:07:33: Application is closed.
+2021-12-30 21:16:59: Application is closed.
+2021-12-30 21:25:38: Application is closed.
+2021-12-30 21:31:42: Application is closed.
+2021-12-30 21:32:22: Failed while sending loading report to BAROQUE! Error:send_notification() takes 3 positional arguments but 5 were given.
+2021-12-30 21:32:22: Application is closed.
+2021-12-30 21:36:46: Application is closed.
+2021-12-30 21:37:11: Information of the Loading of 1 item succesfully sent to BAROQUE.
+2021-12-30 21:37:11: Information of the Loading of 1 item succesfully sent to SHTORGRAD.
+2021-12-30 21:37:11: Information of the Loading of 1 item succesfully sent to halid tekstil.
+2021-12-30 21:37:11: Application is closed.
+2021-12-30 21:58:37: Application is activated.
+2021-12-30 21:58:37: Information of the Loading of 1 item succesfully sent to BAROQUE.
+2021-12-30 21:58:37: Information of the Loading of 1 item succesfully sent to SHTORGRAD.
+2021-12-30 21:58:37: Information of the Loading of 1 item succesfully sent to halid tekstil.
+2021-12-30 21:58:37: Application is closed.
+2021-12-31 13:04:56: Application is activated.
+2021-12-31 13:04:56: Application is tested.
+2021-12-31 13:04:56: Application is closed.
+2021-12-31 14:32:43: Application is activated.
+2021-12-31 14:32:43: Application is closed.
+2021-12-31 15:40:30: Database connection is activated.
+2021-12-31 15:40:30: Application is activated.
+2021-12-31 15:40:30: Application is tested successfully.
+2021-12-31 15:40:30: Close Event of the Server App is successfully activated.
+2021-12-31 16:01:09: Database connection is activated.
+2021-12-31 16:01:09: Application is activated.
+2021-12-31 16:01:09: Application is tested successfully.
+2021-12-31 16:01:09: Application is tested successfully.
+2021-12-31 16:01:09: Application is tested successfully.
+2021-12-31 16:01:09: Application is tested successfully.
+2021-12-31 16:01:09: Close Event of the Server App is successfully activated.
+2021-12-31 16:02:05: Database connection is activated.
+2021-12-31 16:02:05: Application is activated.
+2021-12-31 16:02:05: Application is tested successfully.
+2021-12-31 16:02:05: Close Event of the Server App is successfully activated.
+2021-12-31 16:07:59: Database connection is activated.
+2021-12-31 16:07:59: Application is activated.
+2021-12-31 16:07:59: Application is tested successfully.
+2021-12-31 16:07:59: Invalid entrance is detected at the console.
+2021-12-31 16:07:59: Close Event of the Server App is successfully activated.
+2021-12-31 16:32:08: Database connection is activated.
+2021-12-31 16:32:08: Application is activated.
+2021-12-31 16:32:08: Application is tested successfully.
+2021-12-31 16:32:08: Application is tested successfully.
+2021-12-31 16:32:08: Application is tested successfully.
+2021-12-31 16:32:08: Close Event of the Server App is successfully activated.
+2021-12-31 16:36:31: Database connection is activated.
+2021-12-31 16:36:31: Application is activated.
+2021-12-31 16:36:31: Application is tested successfully.
+2021-12-31 16:36:31: Close Event of the Server App is successfully activated.
+2021-12-31 16:40:20: Database connection is activated.
+2021-12-31 16:40:20: Application is activated.
+2021-12-31 16:41:17: Database connection is activated.
+2021-12-31 16:40:20: Close Event of the Server App is successfully activated.
+2021-12-31 16:41:17: Application is activated.
+2021-12-31 16:41:17: Close Event of the Server App is successfully activated.
+2021-12-31 16:41:39: Database connection is activated.
+2021-12-31 16:41:39: Application is activated.
+2021-12-31 16:41:39: Close Event of the Server App is successfully activated.
+2021-12-31 16:42:35: Database connection is activated.
+2021-12-31 16:42:35: Application is activated.
+2021-12-31 16:42:35: Close Event of the Server App is successfully activated.
+2021-12-31 16:44:23: Database connection is activated.
+2021-12-31 16:44:23: Application is activated.
+2021-12-31 16:44:23: Close Event of the Server App is successfully activated.
+2021-12-31 16:45:29: Database connection is activated.
+2021-12-31 16:45:29: Application is activated.
+2021-12-31 16:45:29: Close Event of the Server App is successfully activated.
+2022-01-06 10:53:02: Database connection is activated.
+2022-01-06 10:53:02: Application is activated.
+2022-01-06 10:53:02: Close Event of the Server App is successfully activated.
+2022-01-06 11:08:57: Database connection is activated.
+2022-01-06 11:08:57: Application is activated.
+2022-01-06 11:08:57: sent_reports method is called from the console.
+2022-01-06 11:08:57: Sending Report Process is started.
+2022-01-06 11:08:57: There was no any loading today to send as a report.
+2022-01-06 11:08:57: Sending Report Process is completed.
+2022-01-06 11:08:57: Reports are sent successfully from the console.
+2022-01-06 11:08:57: sent_records method is called from the console.
+2022-01-06 11:08:57: Record are sent successfully from the console.
+2022-01-06 11:08:57: Close Event of the Server App is successfully activated.
+2022-01-10 09:08:55: Database connection is activated.
+2022-01-10 09:08:55: Application is activated.
+2022-01-10 09:08:55: Close Event of the Server App is successfully activated.
+2022-01-10 09:11:02: Database connection is activated.
+2022-01-10 09:11:02: Application is activated.
+2022-01-10 09:11:22: sent_reports method is called from the console.
+2022-01-10 09:11:22: Sending Report Process is started.
+2022-01-10 09:11:22: There was no any loading today to send as a report.
+2022-01-10 09:11:22: Sending Report Process is completed.
+2022-01-10 09:13:26: Close Event of the Server App is successfully activated.
+2022-01-10 09:19:54: Database connection is activated.
+2022-01-10 09:19:54: Application is activated.
+2022-01-10 09:20:24: Close Event of the Server App is successfully activated.
