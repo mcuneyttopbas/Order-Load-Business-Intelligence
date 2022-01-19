@@ -1984,7 +1984,7 @@ pip install pyinstaller
 Now, you need to open the folder where your script is located with all other relevant files. Please be sure that you have the **.ico** file you want it as the icon of the App. After that, in this folder you have to click on **"Shift"** and **"Right Click"** at the same time. You must be able to see a option called **"Open PowerShell from here"**, click on it without waiting no more. I suggest you to write as I shared below.
 
 ![terminal_pyinstaller](https://user-images.githubusercontent.com/69144354/150142401-2f2edea1-6d77-47dd-af33-7761974a5450.png)
-
+###### Configurations
 ```
 --  one file -> Create a one-file bundled executable.
  -  w -> Windowed, no console
@@ -1995,7 +1995,7 @@ For more option check the [documentation](https://pyinstaller.readthedocs.io/en/
 Please consider that **main file** has to be the last one. <br><br>
 Congrulations! You will find your .exe file in a folder named **"dist"**.
 ### Possible Errors
-When I converted  my project to app, I recognized that my script was not able to find my .txt and .png files. After I relocate the them to folder which .exe file stays, It solved.<br>
+When I converted  my project to app, I recognized that my script was not able to find my .txt and .png files. After I relocate the them to folder which .exe file stays, It solved.<br><br>
 For more possible errors check the [documentation](https://pyinstaller.readthedocs.io/en/stable/when-things-go-wrong.html)
 ## How to Contribute ? 
 
