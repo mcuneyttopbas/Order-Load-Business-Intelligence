@@ -443,7 +443,7 @@ def load_settings_data(self):
 An order can be added as it has Customer and Cargo information as well. The Order Form was created to add an order. Some partial edits can be performed from the [Main Window](#main-window).
 
 ![order](https://user-images.githubusercontent.com/69144354/149923071-f4e49d7c-0e83-435d-85e7-eaf0905e052d.gif)
-#### Searching Products or Codes
+#### Searching Products or Variant Codes
 In cases where the number of products and their variants is high, the best way to perform fast and error-free transactions is to create a good search mechanism.
 ##### Shortcut to Access Searching Form
 From imported class named OrderWindow(), a "self.order" object is created.
@@ -772,10 +772,212 @@ def create_orderCode(self,company):
 ![main](https://user-images.githubusercontent.com/69144354/149923111-59dbb7b8-d875-4268-8980-a02a9b109007.gif)
 
 ### Report Form
-
+There are two important feature that creates the Report Form to consider. One of them is Display Settings. Users are able to choose to observe the reports with the details they want to see together. Other feature is can be described as Filtering Orders as they wish. In this section these two features will be discussed with the code behind it. 
 
 ![report](https://user-images.githubusercontent.com/69144354/149923139-d512d177-0763-423c-a85e-33d1063c7cc6.gif)
 
+#### Creating a Dynamic Structure 
+
+##### Storage of Some Useful Datas
+Only undynamic part of the Report Form is shared below. This data represent some important details. Key of "width" is used to set default sizes of table's cells's width for each detail. For example, while 30 px is enough to display the id, order code needs more space to be read clearly. Key of "path" is helping us to remove some line of code. Excel values are used to set default sizes to cell while converting the report as a xlsx file.
+```python
+self.column_info  = {
+                "Sipariş Kodu" : {"width": 100, "path":"_id","excel":20},
+                "Firma":{"width": 100, "path":"Company Name","excel":20},
+                "ID" : {"width":30,"excel":8},
+                "Durum":{"width":100, "path":"Status","excel":20},
+                "Ürün":{"width":100, "path":"Item","excel":20},
+                "Renk Kodu": {"width":100, "path":"Color","excel":12},
+                "Metre" :{"width":30, "path":"Meter","excel":8},
+                "Alıcı" : {"width":75,"excel":20},
+                "Kargo" : {"width":75,"excel":20},
+                "Sipariş Tarihi":{"width":100,"path":"Order_at","excel":25},
+                "Düzenlenme Tarihi":{"width":150,"path":"Created_at","excel":25},
+                "Sevk Tarihi":{"width":100, "path":"Delivered_at","excel":25},
+                "Not":{"width":150,"path":"Note","excel":30}
+            }
+```
+##### Dynamic Data Holders
+As a start, datas of values of selected radio buttons are kept in list such as **Selected Display Setting**. Everytime the user change a option, thanks to signal-slot connection, software is refreshing list accordingly. Please consider that selections of display settings are creating columns and selections of filter settings are creating rows.
+###### Display Datas
+Holding Datas of Selected Display Setting (Order Code, Product Name etc.) :
+```python
+self.selected_display_items = []
+for button in self.ui.btnGroup_display.buttons():
+    if button.isChecked() == True:
+        self.selected_display_items.append(button.text())
+
+self.ui.table_statics.setColumnCount(len(self.selected_display_items))  
+self.ui.table_statics.setHorizontalHeaderLabels((item for item in self.selected_display_items))
+column_index = 0
+
+for item in self.selected_display_items:     
+    self.ui.table_statics.setColumnWidth(column_index,self.column_info[item]["width"])
+    column_index += 1
+```
+For any changing at Display Settings, Signal-Slot Connection  :
+```python
+self.ui.btnGroup_display.buttonToggled[QtWidgets.QAbstractButton, bool].connect(self.display_table)
+```
+That connection helps to  syncronize  the display detail choices.
+###### Filter Datas
+Holding Datas of Selected Filteration Setting (Company Name, Order Status:New,Preparing etc.) :
+```python
+self.selected_filter_items = []
+          for button in self.ui.btnGroup_orderDetails.buttons():
+              if button.isChecked() == True:
+                  self.selected_filter_items.append(button.objectName()[:-12])
+
+          rowCount = 0
+          for order in self.order_coll.find():
+              if self.ui.cb_company.currentText() != "":
+                  if self.ui.cb_company.currentText() != order["Company Name"]:
+                      continue 
+              for order_items in order["Order Details"]:
+                  if order['Order Details'][order_items]['Status'] in self.selected_filter_items :
+                      create_date = order["Created_at"].split()[0].split("-") 
+                      year, month, day = create_date
+                      date = datetime.datetime(int(year), int(month), int(day))
+                      if self.ui.date_start.date() <= date <= self.ui.date_end.date():
+                          rowCount += 1 
+          self.ui.table_statics.setRowCount(rowCount)
+```
+For any changing at Filteration Settings, Signal-Slot Connection  :
+```python
+self.ui.btnGroup_orderDetails.buttonToggled[QtWidgets.QAbstractButton, bool].connect(self.display_table)
+```
+That connection helps to  syncronize  the filteration detail choices.
+
+#### Data Transferring to the Table
+As rows and columns are set, managing function of the data while observing is shared below.
+
+##### Selecting Algorithm of Quries of Rows and Columns
+1. Is the item which is reached via "for" loop matching with the selected one, if it is selected from combobox?
+2. Is the order's Creating Date between starting and finishing QDate objects?
+    - As default, QDate objects are setting for last 1 month.
+3. Is Status of the Order in list of *selected_filter_items* ?
+4. Which details are choosen to set as a column? 
+    - To check this info, a "for" loop is set which is comparing the order details with the items of *selected_display_items*
+
+```python
+meter = 0
+record = 0
+
+row_index = 0
+for order in self.order_coll.find():
+    if self.ui.cb_company.currentText() != "":
+        if self.ui.cb_company.currentText() != order["Company Name"]:
+            continue 
+    for order_items in order["Order Details"]:
+        create_date = order["Created_at"].split()[0].split("-") 
+        year, month, day = create_date
+        date = datetime.datetime(int(year), int(month), int(day))
+        if self.ui.date_start.date() <= date <= self.ui.date_end.date():
+            if order['Order Details'][order_items]['Status'] in self.selected_filter_items :
+
+                for item in self.selected_display_items:
+                    if item == "Sipariş Kodu" or item == "Firma" or item == "Düzenlenme Tarihi" or item == "Sipariş Tarihi":
+                        self.ui.table_statics.setItem(row_index,self.selected_display_items.index(item),QTableWidgetItem(order[self.column_info[item]["path"]]))
+                    elif item == "Durum":
+                        if order['Order Details'][order_items]['Status'] == "new":
+                            self.ui.table_statics.setItem(row_index,self.selected_display_items.index(item),QTableWidgetItem("YENİ"))
+                        elif order['Order Details'][order_items]['Status'] == "preparing":
+                            self.ui.table_statics.setItem(row_index,self.selected_display_items.index(item),QTableWidgetItem("HAZIRLANAN"))
+                        elif order['Order Details'][order_items]['Status'] == "waiting":
+                            self.ui.table_statics.setItem(row_index,self.selected_display_items.index(item),QTableWidgetItem("BEKLEYEN"))
+                        elif order['Order Details'][order_items]['Status'] == "ready":
+                            self.ui.table_statics.setItem(row_index,self.selected_display_items.index(item),QTableWidgetItem("TAMAMLANAN"))
+                        elif order['Order Details'][order_items]['Status'] == "delivered":
+                            self.ui.table_statics.setItem(row_index,self.selected_display_items.index(item),QTableWidgetItem("SEVKEDİLEN"))
+                    elif item == "ID":
+                        self.ui.table_statics.setItem(row_index,self.selected_display_items.index(item),QTableWidgetItem(order_items))
+                    elif item == "Ürün" or item == "Renk Kodu" or item == "Metre" or item == "Not" or item == "Sevk Tarihi":
+                        self.ui.table_statics.setItem(row_index,self.selected_display_items.index(item),QTableWidgetItem(order['Order Details'][order_items][self.column_info[item]["path"]]))
+                        if item == "Metre":
+                            try:
+                                meter += int(order['Order Details'][order_items][self.column_info[item]["path"]])
+                            except ValueError:
+                                meter += float(order['Order Details'][order_items][self.column_info[item]["path"]])
+                    elif item == "Alıcı":
+                        self.ui.table_statics.setItem(row_index,self.selected_display_items.index(item),QTableWidgetItem(order["Receiver Info"]["Receiver Name"]))
+                    elif item == "Kargo":
+                        self.ui.table_statics.setItem(row_index,self.selected_display_items.index(item),QTableWidgetItem(order["Shipping Info"]["Shipper Name"]))
+
+                row_index += 1
+                record += 1 
+                self.rowIndex = row_index
+
+self.ui.lbl_amount.setText("Toplam Metre :")
+self.ui.lbl_txt_amount.setText(str(meter)+" MT")
+self.ui.lbl_record.setText("Toplam Kayıt :")
+self.ui.lbl_txt_record.setText(str(record))
+```
+#### Converting as Excel File
+
+##### Selecting Algorithm of Rows and Columns
+1.  Open a Excel File.
+2.  Set Column widths the size which is set with *self.column_info* dictionary.
+3.  Set same amount of Row with the variable of *self.rowIndex*.
+4.  Set same amount of Column with the lenght of *selected_display_items*.
+5.  If Column is "Meter", reformat it as a integer type of data.
+6.  Set a Random Code for the document.
+7.  Save the file to selected path with file browser.
+
+Users are able to convert the data as they have seen on QTableWidget. Choosen Column details may change according to user's needs so this structure also has to be dynamic as well as rest of the code of the Report Form. Thanks to data holder list that we assigned above helps to do that quickly.
+
+```python
+def convert_excel(self):   
+try:
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Order & Load Report"
+    headings = self.selected_display_items
+    ws.append(headings)
+
+    for col in range(len(self.selected_display_items)):
+        ws[get_column_letter(col+1) + "1"].font = Font(bold=True)
+        ws.column_dimensions[get_column_letter(col+1)].width = self.column_info[self.selected_display_items[col]]["excel"]
+
+    for row in range(self.rowIndex):
+        row_data = []
+        for column in range(len(self.selected_display_items)):
+            if self.selected_display_items[column] == "Metre":
+                try:
+                    formatted_meter = int(self.ui.table_statics.item(row,column).text())
+                    row_data.append(formatted_meter)
+                except ValueError:
+                    formatted_meter = float(self.ui.table_statics.item(row,column).text())
+                    row_data.append(formatted_meter)
+            else:
+                row_data.append(self.ui.table_statics.item(row,column).text())
+        ws.append(row_data)
+
+    filecode = random.randint(1,10000000000)
+    dir_path = QFileDialog.getExistingDirectory()
+    print(type(dir_path))
+    print(dir_path)
+    if dir_path != "":
+        wb.save(dir_path + f"/O&L-{filecode}.xlsx")
+
+        msg = QMessageBox()
+        msg.setWindowTitle("İşlem Raporu")
+        msg.setText(f" Dosya {f'/O&L-{filecode}.xlsx'} oluşturuldu.")
+        msg.setIcon(QMessageBox.Information)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.setWindowIcon(QtGui.QIcon('icon.png'))
+        msg.raise_()
+        x = msg.exec_()
+
+except Exception as ex :
+    msg = QMessageBox()
+    msg.setWindowTitle("Uyarı")
+    msg.setText(f"Hata: {ex}")
+    msg.setIcon(QMessageBox.Warning)
+    msg.setStandardButtons(QMessageBox.Ok)
+    msg.setWindowIcon(QtGui.QIcon('icon.png'))
+    msg.raise_()
+    x = msg.exec_() 
+```
 
 ## Server Application
 The main purpose of the Server Application is to send a report which contains daily loadings to the relevant customers at the end of the day.
