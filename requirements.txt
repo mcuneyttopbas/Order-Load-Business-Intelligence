@@ -1,0 +1,14 @@
+PyQt5
+pymongo
+pyinstaller
+pandas
+stmplib
+ssl
+json
+pynput
+sys
+email
+openpyxl
+random
+time
+datetime
