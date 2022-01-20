@@ -722,6 +722,64 @@ def save_order(self):
         self.not_freeze_the_form(True)
         self.order_coll.insert_one(self.order_data)
 ```
+##### Order Notification 
+After the Adding Order proccess is done, notification e-mail is sent to **operation departmant** and relevant customer if **radio button of notification** which is located ins etting form is checked.
+###### Function
+```python
+ toList = []
+ccList = []
+
+settings = self.setting_coll.find_one({"_id":"notifications"})
+for setting in settings:
+    if setting == "operation_departmant":
+        for adress in settings[setting]:
+            toList.append(adress["mail"])
+    elif setting == "executive":
+        for adress in settings[setting]:
+            ccList.append(adress["mail"])
+    elif setting == "customer_service":
+        for adress in settings[setting]:
+            ccList.append(adress["mail"])
+
+customer = self.customer_coll.find_one({"_id":company})
+for info in customer:
+    if "mail" in info:
+        if customer[info] != "":
+            ccList.append(customer[info])
+
+########## Simple Mail Formatting ############
+subject = f"SİPARİŞ / ORDER : {order_code}"
+
+intro1 = f"{'Sipariş Kodu:':20}{order_code}\n"
+intro2 = f"{'Firma:':20}{company}\n"
+intro3 = f"{'Sipariş Tarih:':20}{order_date}\n"
+intro4 = f"{'Düzenlenme Tarih:':20}{created_at}\n"
+intro5 = f"{'Düzenleyen:':20}{self.username}\n"
+intros = intro1 + intro2 + intro3 + intro4 + intro5
+
+receiver_head = f"{'ALICI BİLGİLERİ':20}\n"
+receiver_info1 = f"{'Alıcı Adı:':20}{receiver}\n"
+receiver_info2 = f"{'Yetkili Kişi:':20}{authority}\n"
+receiver_info3 = f"{'Tel No:':20}{company_phone}\n"
+receiver_info4 = f"{'GSM:':15}{company_gsm}\n"
+receiver_info5 =  f"{'Adres:':20}{company_adress}\n"
+receiver_infos = receiver_head + receiver_info1 + receiver_info2 + receiver_info3 + receiver_info4 + receiver_info5
+
+shipment_head = f"{'TESLİMAT BİLGİLERİ':20}\n"
+shipment_info1 = f"{'Nakliyeci Adı:':20}{shipper_name}\n"
+shipment_info2 = f"{'Müşteri No:':20}{customer_code}\n"
+shipment_info3 = f"{'Taşıma Tipi:':20}{ship_type}\n"
+shipment_info4 = f"{'Tel No':20}{ship_phone}\n"
+shipment_info5 = f"{'Adres:':20}{ship_adress}\n"
+shipment_infos = shipment_head + shipment_info1 + shipment_info2 + shipment_info3 + shipment_info4 + shipment_info5
+
+body = "\n" + intros + "\n\n" + feedback + "\n\n" + receiver_infos + "\n" + shipment_infos
+
+self.send_notification(toList,ccList,subject,body)
+```
+######  Sample Notification E-Mail
+![order_mail](https://user-images.githubusercontent.com/69144354/150286826-22d4a8b3-91da-4ac2-adb9-37630435a688.png)
+
 
 #### Generating & Ordering Order Codes
 ###### Algorithm
@@ -1548,6 +1606,33 @@ def send_notification(self,subject,body):
         self.write_on_records(f"Error occured while sending notification to technic: {ex}")
 ```
 ###### Examples For Usage
+In case of Reporting Loadings :
+After Loading datas are filtered, function shared below is starting to work.
+```python
+if len(delivered_items)  > 0:
+toList = []
+ccList = []
+
+customer = self.customer_coll.find_one({"_id":company["_id"]})
+for info in customer:
+    if "mail" in info:
+        if customer[info] != "":
+            toList.append(customer[info])
+
+settings = self.setting_coll.find_one({"_id":"notifications"})
+for setting in settings:
+    if setting == "executive":
+        for adress in settings[setting]:
+            ccList.append(adress["mail"])
+
+subject = f"LOADING REPORT: {company['_id']} {self.day}{self.month}{str(self.year)[-2:]}"
+body = "Hello,\n\nThe details of your loading done today are shared below,\n\n\n"
+for item in delivered_items:
+    body += (item + "\n\n")
+body += "\n\nPlease do not reply this e-mail."
+
+self.send_notification_to_customer(toList,ccList,subject,body)
+```
 In case of Error  :
 ```python
 except Exception as ex:
@@ -1564,6 +1649,15 @@ def closeEvent(self,event):
     self.send_notification(subject,body)
     self.write_on_records("Close Event of the Server App is successfully activated.")
 ```
+###### Sample Notification E-Mails  
+###### Loading Report : 
+![report_mail](https://user-images.githubusercontent.com/69144354/150288382-d2bc98c2-4fe0-4ca2-a8cc-5e5c8a9e3570.png)
+
+###### Error  :
+![error_mail](https://user-images.githubusercontent.com/69144354/150288427-94f665a1-c900-4b7e-a3bf-e3b1bb87e4d6.png)
+
+###### Close Event  :
+![closeEvent_mail](https://user-images.githubusercontent.com/69144354/150288472-9098576a-25f3-41be-bde2-169a75fe4c74.png)
 
 ## Data Modelling
 
