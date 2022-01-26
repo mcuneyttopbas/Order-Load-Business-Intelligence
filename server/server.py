@@ -291,7 +291,7 @@ class ServerWidget(QtWidgets.QMainWindow):
 if __name__ == "__main__":
     def app():
         app = QtWidgets.QApplication(sys.argv)
-        win = ServerWidget("cuneyttopbas","Cnyt1234")
+        win = ServerWidget(MongoDB_username,MongoDB_password)
         win.show()
         sys.exit(app.exec_())
 
